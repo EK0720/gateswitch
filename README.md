@@ -14,7 +14,7 @@
 [![CI](https://github.com/EK0720/gateswitch/actions/workflows/ci.yml/badge.svg)](https://github.com/EK0720/gateswitch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**English** · [Tiếng Việt](README.vi.md)
+**English** · [Tiếng Việt](README.vi.md) · [Website](https://ek0720.github.io/gateswitch/)
 
 <img src="docs/screenshots/overview.png" alt="Overview: every AI coding app, the gateway and model it uses, and what needs fixing" width="860">
 

@@ -1,6 +1,6 @@
 # Gateswitch — Chuyển gateway, API key và model cho Codex, Claude Code, Claude Desktop & Orca (Windows · macOS · Linux)
 
-[English](README.md) · **Tiếng Việt**
+[English](README.md) · **Tiếng Việt** · [Trang web](https://ek0720.github.io/gateswitch/)
 
 <sub>Trước đây tên là <i>Model Switcher</i>.</sub>
 
