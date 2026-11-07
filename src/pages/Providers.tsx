@@ -114,11 +114,11 @@ export function Providers({ notify }: { notify: (t: string) => void }) {
         <div className="card form" style={{ marginBottom: 16 }}>
           <div className="field">
             <label htmlFor="pv-name">{t("Name")}</label>
-            <input id="pv-name" className="input" autoFocus placeholder="9router" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <input id="pv-name" className="input" autoFocus placeholder={t("e.g. My gateway")} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           </div>
           <div className="field">
             <label htmlFor="pv-url">Base URL<small>{t("Usually ends with /v1")}</small></label>
-            <input id="pv-url" className="input" placeholder="http://localhost:20128/v1" value={draft.baseUrl} onChange={(e) => setDraft({ ...draft, baseUrl: e.target.value })} />
+            <input id="pv-url" className="input" placeholder="https://your-gateway.example.com/v1" value={draft.baseUrl} onChange={(e) => setDraft({ ...draft, baseUrl: e.target.value })} />
           </div>
           <div className="field">
             <label htmlFor="pv-key">API key<small>{draft.id ? t("Leave empty to keep the current key") : t("Stored in the system keychain")}</small></label>
@@ -134,7 +134,7 @@ export function Providers({ notify }: { notify: (t: string) => void }) {
 
       {items && items.length === 0 && !draft && (
         <div className="card empty">
-          {t("No providers yet. Add your gateway (for example 9router) to use it with Codex, Claude Code and Claude Desktop.")}
+          {t("No providers yet. Add your gateway (base URL and API key) to use it with Codex, Claude Code and Claude Desktop.")}
         </div>
       )}
 
