@@ -151,10 +151,6 @@ cd src-tauri && cargo test
 
 Issues and pull requests are welcome. Most wanted right now: **macOS and Linux test reports** and **translations**. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Star history
-
-[![Star History Chart](https://api.star-history.com/svg?repos=EK0720/model-switcher&type=Date)](https://www.star-history.com/#EK0720/model-switcher&Date)
-
 ## License
 
 [MIT](LICENSE). Independent project, not affiliated with OpenAI or Anthropic.
