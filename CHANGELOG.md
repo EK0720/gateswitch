@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+### Added
+- In-app updates: a notice when a new version is out, then **Update and restart** in one click. Update packages are signed and checked against the public key built into the app before they install. The check fetches only `latest.json` from this repo's GitHub releases; turn it off in Settings → Updates. Works with the Windows installers, the macOS app and the Linux AppImage (not the `.deb`).
+
+### Fixed
+- Backup encryption key on macOS/Linux: creating the key is now atomic, so two backups at once can no longer end up with different keys.
+
 ## 0.2.0
 
 ### Changed

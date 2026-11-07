@@ -31,6 +31,7 @@ You have an OpenAI- or Anthropic-compatible gateway: LiteLLM, OpenRouter, a comp
 - **Fixes the classic errors**: Doctor finds stale variables behind HTTP 400 `reasoning_effort`, broken config files, proxies and managed policies, with one-click fixes.
 - **Usage without uploads**: tokens, cache hit rate and cost estimates, read from logs already on your machine.
 - **Codex image generation** through your gateway, transparent PNG by default.
+- **One-click updates**, signed and verified before install.
 - **Cross-platform**, English and Vietnamese, light and dark theme, Ctrl+K command palette.
 
 ## Screenshots
@@ -66,6 +67,8 @@ Get the latest build from [**Releases**](https://github.com/EK0720/model-switche
 > - **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
 > - **Linux** (AppImage): `chmod +x model-switcher*.AppImage`, then run it.
 >
+> After that, updates install from inside the app (Windows, macOS, AppImage; `.deb` users download new versions by hand).
+>
 > Compare the file's SHA-256 with the one on the release page: `Get-FileHash <file> -Algorithm SHA256` (Windows), `shasum -a 256 <file>` (macOS), `sha256sum <file>` (Linux).
 
 ## Quick start
@@ -90,7 +93,7 @@ Changed your mind? **Restore → Undo** on that change, or **Restore defaults** 
 <details>
 <summary><strong>Is my API key safe?</strong></summary>
 
-Keys live in the OS keychain (Windows Credential Manager, macOS Keychain, Secret Service on Linux). They are written only where an app cannot read them any other way (Claude Code's `settings.json`, Claude Desktop's config). Keys never appear in logs, error messages, support reports or preset files. File backups are encrypted (DPAPI on Windows, AES-256-GCM with the key in the keychain elsewhere). The app talks only to the gateways you add; there is no telemetry.
+Keys live in the OS keychain (Windows Credential Manager, macOS Keychain, Secret Service on Linux). They are written only where an app cannot read them any other way (Claude Code's `settings.json`, Claude Desktop's config). Keys never appear in logs, error messages, support reports or preset files. File backups are encrypted (DPAPI on Windows, AES-256-GCM with the key in the keychain elsewhere). The app talks only to the gateways you add, plus GitHub to check for updates (turn it off in Settings → Updates); there is no telemetry.
 
 </details>
 

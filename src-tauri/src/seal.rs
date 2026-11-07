@@ -58,15 +58,24 @@ mod imp {
     use ring::rand::{SecureRandom, SystemRandom};
 
     const ACCOUNT: &str = "backup-key";
+    /// The key once read or created. The lock also makes "read, else create"
+    /// atomic: two seals at once must not each create (and overwrite) a key,
+    /// or backups sealed with the first key could never be opened.
+    static CACHE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
     fn key(create: bool) -> Result<LessSafeKey, String> {
-        let hex = match Keychain.get(ACCOUNT) {
-            Some(h) => h,
+        let mut cache = CACHE.lock().unwrap_or_else(|e| e.into_inner());
+        if cache.is_none() {
+            *cache = Keychain.get(ACCOUNT);
+        }
+        let hex = match cache.as_ref() {
+            Some(h) => h.clone(),
             None if create => {
                 let mut k = [0u8; 32];
                 SystemRandom::new().fill(&mut k).map_err(|_| "Could not create a key")?;
                 let h: String = k.iter().map(|b| format!("{b:02x}")).collect();
                 Keychain.put(ACCOUNT, &h)?;
+                *cache = Some(h.clone());
                 h
             }
             None => return Err("The backup decryption key is missing from the keychain".into()),

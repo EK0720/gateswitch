@@ -3,6 +3,7 @@ import { api, Check, errText } from "../api";
 import { Icon } from "../icons";
 import { getLang, Lang, setLang, t, tr } from "../i18n";
 import { Info } from "./Info";
+import { autoCheck, checkForUpdate, currentVersion, installUpdate, setAutoCheck, useUpdate } from "../updater";
 
 export function Settings({ dark, onToggleTheme, notify, go, onLang }: { dark: boolean; onToggleTheme: () => void; notify: (t: string) => void; go: (route: string) => void; onLang?: (l: Lang) => void }) {
   const lang = getLang();
@@ -15,6 +16,10 @@ export function Settings({ dark, onToggleTheme, notify, go, onLang }: { dark: bo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [report, setReport] = useState("");
+  const update = useUpdate();
+  const [auto, setAuto] = useState(autoCheck());
+  const [version, setVersion] = useState("");
+  useEffect(() => { currentVersion().then(setVersion).catch(() => {}); }, []);
 
   function load() {
     setBusy(true); setError("");
@@ -75,6 +80,34 @@ export function Settings({ dark, onToggleTheme, notify, go, onLang }: { dark: bo
           <div className="seg" role="group" aria-label={t("Language")}>
             <button aria-pressed={lang === "en"} onClick={() => pickLang("en")}>English</button>
             <button aria-pressed={lang === "vi"} onClick={() => pickLang("vi")}>Tiếng Việt</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-title">{t("Updates")}</div>
+      <div className="card">
+        <div className="issue">
+          <div>
+            <b>{t("Version {v}", { v: version })}</b>
+            <p>
+              {update.kind === "checking" && t("Checking…")}
+              {update.kind === "latest" && t("You have the latest version.")}
+              {update.kind === "available" && t("Version {v} is available.", { v: update.version })}
+              {update.kind === "downloading" && t("Downloading {v}…", { v: update.version })}
+              {update.kind === "ready" && t("Restarting…")}
+              {update.kind === "error" && t("Could not check for updates. Check your connection and try again.")}
+              {update.kind === "idle" && t("Checks GitHub for a newer signed release. Nothing else is sent.")}
+            </p>
+          </div>
+          {update.kind === "available"
+            ? <button className="btn primary small" onClick={installUpdate}>{t("Update and restart")}</button>
+            : <button className="btn small" disabled={update.kind === "checking" || update.kind === "downloading"} onClick={checkForUpdate}>{t("Check for updates")}</button>}
+        </div>
+        <div className="issue">
+          <div><b>{t("Check for updates automatically")}</b><p>{t("When the app starts. You always choose when to install.")}</p></div>
+          <div className="seg" role="group" aria-label={t("Check for updates automatically")}>
+            <button aria-pressed={auto} onClick={() => { setAutoCheck(true); setAuto(true); }}>{t("On")}</button>
+            <button aria-pressed={!auto} onClick={() => { setAutoCheck(false); setAuto(false); }}>{t("Off")}</button>
           </div>
         </div>
       </div>

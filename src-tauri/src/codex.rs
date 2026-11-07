@@ -355,8 +355,9 @@ mod tests {
 
     #[test]
     fn orca_home_is_not_codex_home() {
-        assert!(is_orca_home(Path::new(r"C:\Users\x\AppData\Roaming\orca\codex-runtime-home\home")));
-        assert!(!is_orca_home(Path::new(r"C:\Users\x\.codex")));
+        let base = Path::new("users").join("x");
+        assert!(is_orca_home(&base.join("orca").join("codex-runtime-home").join("home")));
+        assert!(!is_orca_home(&base.join(".codex")));
     }
 
     #[test]

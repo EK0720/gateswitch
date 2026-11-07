@@ -385,3 +385,7 @@ details.fix summary::before{content:"?";display:inline-grid;place-items:center;w
 details.fix p{font-size:12.5px;color:var(--lead);margin:8px 0}
 details.fix pre{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:8px;padding:8px 10px;margin:0 0 8px;white-space:pre-wrap}
 .fix-acts{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.update-bar{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 14px;border:1px solid var(--plum-2);background:var(--plum-soft);border-radius:10px;font-size:13.5px}
+.update-bar .grow{flex:1}
+.update-bar svg{flex:none}
+button.link{background:none;border:0;padding:0;color:var(--plum);font:inherit;cursor:pointer;text-decoration:underline}

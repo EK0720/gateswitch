@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { api, Change, errText, Scan } from "./api";
 import { Icon, IconName } from "./icons";
 import { Overview } from "./pages/Overview";
@@ -14,6 +15,7 @@ import { Settings } from "./pages/Settings";
 import { Palette, PaletteItem } from "./Palette";
 import { TitleBar } from "./TitleBar";
 import { getLang, Lang, setLang, t, tr } from "./i18n";
+import { autoCheck, checkForUpdate, currentVersion, dismiss, installUpdate, isDismissed, useUpdate } from "./updater";
 
 type Route =
   | "overview" | "providers" | "codex" | "claude-code" | "claude-desktop" | "orca"
@@ -54,6 +56,15 @@ export default function App() {
   const [toast, setToast] = useState("");
   const [palette, setPalette] = useState(false);
   const [lang, setLangState] = useState<Lang>(getLang());
+  const [version, setVersion] = useState("");
+  const update = useUpdate();
+
+  useEffect(() => {
+    currentVersion().then(setVersion).catch(() => {});
+    if (!autoCheck()) return;
+    const id = window.setTimeout(checkForUpdate, 4000);
+    return () => window.clearTimeout(id);
+  }, []);
 
   function switchLang(next: Lang) {
     setLang(next);
@@ -133,7 +144,7 @@ export default function App() {
           </div>
         ))}
         <div className="foot">
-          v0.2
+          {version ? `v${version}` : ""}
           <span className="lang" role="group" aria-label={t("Language")}>
             <button aria-pressed={lang === "en"} onClick={() => switchLang("en")}>EN</button>
             <button aria-pressed={lang === "vi"} onClick={() => switchLang("vi")}>VI</button>
@@ -145,6 +156,22 @@ export default function App() {
       </aside>
 
       <main>
+        {update.kind === "available" && !isDismissed(update) && (
+          <div className="update-bar" role="status">
+            <Icon name="dl" />
+            <span>{t("Version {v} is available.", { v: update.version })}</span>
+            <button className="link" onClick={() => openUrl(`https://github.com/EK0720/model-switcher/releases/tag/v${update.version}`).catch(() => {})}>{t("What's new")}</button>
+            <span className="grow" />
+            <button className="btn ghost small" onClick={dismiss}>{t("Later")}</button>
+            <button className="btn primary small" onClick={installUpdate}>{t("Update and restart")}</button>
+          </div>
+        )}
+        {update.kind === "downloading" && (
+          <div className="update-bar" role="status">
+            <Icon name="dl" />
+            <span>{t("Downloading {v}…", { v: update.version })} {update.total ? `${Math.round((update.done / update.total) * 100)}%` : ""}</span>
+          </div>
+        )}
         <section className="page on" key={route}>
           {route === "overview" && (
             <Overview scan={scan} onRefresh={() => { refresh(); notify(t("Rescanned")); }} go={(r) => setRoute(r as Route)} />

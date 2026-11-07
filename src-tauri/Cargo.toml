@@ -1,6 +1,6 @@
 [package]
 name = "model-switcher-next"
-version = "0.2.0"
+version = "0.2.1"
 description = "Switch gateway, API key and model for Codex, Claude Code, Claude Desktop and Orca"
 authors = ["EK0720"]
 edition = "2024"
@@ -47,6 +47,10 @@ tempfile = "3.27.0"
 [target."cfg(windows)".dependencies]
 windows-sys = { version = "0.61.2", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Security_Cryptography"] }
 winreg = "0.56.0"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
 
 # Dependencies (serde_json parses GBs of logs on the Usage page) are optimised
 # even in `tauri dev`; our own crate stays fast to rebuild.

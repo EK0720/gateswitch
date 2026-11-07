@@ -454,6 +454,8 @@ fn apply_effects(window: &tauri::WebviewWindow) -> bool {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // Backups from builds before encryption: seal them in the background.
             std::thread::spawn(|| store().seal_old_backups());
