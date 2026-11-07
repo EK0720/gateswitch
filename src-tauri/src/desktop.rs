@@ -409,7 +409,7 @@ mod tests {
         // Setup again for the same gateway: updates our entry, no new one.
         let again = render_entry(&Request { provider_id: "9router".into(), model: "cx/gpt-6-astra".into(), auth: None, one_m: false, all_models: true }, "http://localhost:20128/v1", "sk-k", &["cx/gpt-6-astra".to_string()], &Default::default()).unwrap();
         let id2 = apply(&dir, "", &again).unwrap();
-        assert_eq!(id, id2, "cùng gateway phải dùng lại entry");
+        assert_eq!(id, id2, "the same gateway must reuse its entry");
         let cur = read_current(Some(&dir));
         assert_eq!(cur.entries.len(), 1);
         assert_eq!(cur.entries[0].default_model, "cx/gpt-6-astra");

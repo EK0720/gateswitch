@@ -1,32 +1,34 @@
-# Model Switcher — Chuyển gateway, API key và model cho Codex, Claude Code, Claude Desktop & Orca (Windows · macOS · Linux)
+# Model Switcher
 
-> Dự án độc lập, không liên kết với OpenAI hay Anthropic.
+**Point Codex, Claude Code, Claude Desktop and Orca at any OpenAI/Anthropic-compatible gateway in one click, and undo it just as easily.** Windows · macOS · Linux.
 
-<!-- Ảnh chụp màn hình: thêm docs/screenshot.png trước khi public -->
+**English** · [Tiếng Việt](README.vi.md)
 
-## Tính năng
+> Independent project. Not affiliated with OpenAI or Anthropic.
 
-- **Một nơi cho mọi gateway**: thêm nhà cung cấp (URL + key), tải danh sách model, đo độ trễ.
-- **Setup từng app một cú bấm**: Codex CLI/Desktop, Claude Code, Claude Desktop (cấu hình bên thứ ba), Orca.
-- **Preset gateway**: nhập file `.json` do gateway phát hành hoặc preset mẫu (9router, LiteLLM, OpenRouter), chỉ cần dán key.
-- **Kiểm tra khả năng**: gửi request thật để biết gateway có hỗ trợ streaming, tool, prompt caching, ảnh hay không.
-- **Doctor**: tìm cấu hình hỏng, biến môi trường cũ gây lỗi 400, proxy, policy quản lý; có nút sửa nhanh.
-- **Sử dụng**: thống kê token và tỉ lệ cache từ log trên máy, ước tính chi phí theo giá bạn nhập.
-- **Hoàn tác và Khôi phục mặc định**: mỗi thay đổi đều hoàn tác được; một bước đưa các app về như trước khi dùng tool.
+## Features
 
-## Tải về
+- **One place for every gateway**: add a provider (base URL + API key), fetch its model list, measure latency.
+- **One-click setup per app**: Codex CLI/Desktop, Claude Code, Claude Desktop (third-party inference), Orca.
+- **Gateway presets**: import a `.json` preset published by your gateway, or a sample preset (9router, LiteLLM, OpenRouter), then paste your key.
+- **Capability check**: real requests tell you whether the gateway supports streaming, tools, prompt caching and images, per model.
+- **Doctor**: finds broken config, stale environment variables that cause HTTP 400, proxies and managed policies, with one-click fixes.
+- **Usage**: token counts and cache hit rate from local logs, with cost estimates at prices you enter.
+- **Undo and Restore defaults**: every change can be undone; one step puts every app back the way it was before the tool.
 
-> **Lưu ý:** bản Windows đã chạy thử trên máy thật. Bản **macOS và Linux chưa được test** trên máy thật (mới build qua CI); nếu gặp lỗi, hãy mở issue kèm báo cáo hỗ trợ (Cài đặt → Xuất báo cáo).
+## Download
 
-Bản build **chưa ký số**, nên lần đầu mở hệ điều hành sẽ cảnh báo:
+> **Note:** the Windows build has been tested on real machines. The **macOS and Linux builds have not been tested** on real machines yet (they are only built by CI). If something breaks, please open an issue and attach a support report (Settings → Support report).
 
-- **Windows** (SmartScreen "Windows protected your PC"): bấm **More info → Run anyway**.
-- **macOS** ("không thể mở vì không xác minh được nhà phát triển"): chuột phải vào app → **Open**, hoặc chạy `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
-- **Linux** (AppImage): `chmod +x model-switcher*.AppImage` rồi chạy.
+The builds are **not code-signed**, so your OS will warn you the first time:
 
-Tool không tự cập nhật; xem bản mới ở trang Releases.
+- **Windows** (SmartScreen "Windows protected your PC"): click **More info → Run anyway**.
+- **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
+- **Linux** (AppImage): `chmod +x model-switcher*.AppImage`, then run it.
 
-Xem trang [Releases](../../releases). So mã SHA256 của file tải về với mã ghi trên trang Release trước khi chạy:
+There is no auto-update; check [Releases](../../releases) for new versions.
+
+Get the installer from [Releases](../../releases) and compare its SHA-256 with the one listed on the release page before running it:
 
 ```powershell
 Get-FileHash .\Model.Switcher_x64-setup.exe -Algorithm SHA256
@@ -37,53 +39,57 @@ shasum -a 256 Model.Switcher*.dmg   # macOS
 sha256sum model-switcher*.AppImage  # Linux
 ```
 
-## Bắt đầu nhanh
+## Quick start
 
-1. **Nhà cung cấp → Thêm** (hoặc **Nhập preset**): điền base URL (thường kết thúc bằng `/v1`) và API key.
-2. Bấm **Tải model**.
-3. Mở trang app muốn dùng (Codex, Claude Code…), chọn nhà cung cấp và model, bấm **Áp dụng**. Khởi động lại app.
+1. **Providers → Add** (or **Import preset**): enter the base URL (usually ending in `/v1`) and the API key.
+2. Click **Fetch models**.
+3. Open the page for the app you use (Codex, Claude Code…), pick the provider and model, click **Set up**. Restart the app.
 
-## App hỗ trợ
+## Supported apps
 
-| App | File được sửa | Ghi chú |
+| App | File changed | Notes |
 |---|---|---|
-| Codex CLI / Desktop | `~/.codex/config.toml` | Tên provider và biến key mặc định là `gateway` / `GATEWAY_API_KEY` (không lộ tên gateway), sửa được ở Nâng cao; catalog cho menu `/model` |
-| Claude Code | `~/.claude/settings.json` | Thêm mục "Từ gateway" vào menu `/model` |
-| Claude Desktop | `configLibrary` của chế độ bên thứ ba | Không ghi nếu máy có managed policy; xóa được cả cấu hình cũ không do tool tạo (hoàn tác được) |
-| Orca | Không cần setup riêng | Orca tự sao `~/.codex/config.toml` sang Codex riêng của nó; tool báo đã đồng bộ chưa, có nút đồng bộ ngay và khởi động lại daemon |
+| Codex CLI / Desktop | `~/.codex/config.toml` | Provider name and key variable default to `gateway` / `GATEWAY_API_KEY` (the gateway's name is not exposed), editable under Advanced; adds a catalog for the `/model` menu |
+| Claude Code | `~/.claude/settings.json` | Adds a "From gateway" entry to the `/model` menu |
+| Claude Desktop | Third-party inference `configLibrary` | Not written if the machine has a managed policy; can also delete old entries the tool did not create (undoable) |
+| Orca | No separate setup | Orca copies `~/.codex/config.toml` into its own Codex home; the tool shows whether it is in sync, with Sync now and daemon restart |
 
-## Bảo mật & hoàn tác
+## Security and undo
 
-- Key nhà cung cấp nằm trong keychain của hệ điều hành (Windows Credential Manager, macOS Keychain, Secret Service trên Linux), không nằm trong file của tool.
-- Một số app bắt buộc đọc key từ file cấu hình của chúng (Claude Code, Claude Desktop). Tool chỉ ghi key vào đúng những chỗ đó.
-- Mọi lần ghi đều nguyên tử và có bản sao lưu. Bản sao lưu được mã hóa: DPAPI trên Windows, AES-256-GCM với khóa giữ trong keychain trên macOS/Linux.
-- Key không bao giờ xuất hiện trong log, thông báo lỗi, báo cáo hỗ trợ hay file preset.
-- **Khôi phục mặc định** (trang Khôi phục) có hai chế độ:
-  - *Gỡ phần của tool*: chỉ bỏ những gì tool thêm vào, giữ các chỉnh sửa khác của bạn.
-  - *Về bản gốc*: trả file về đúng bản trước lần đầu tool ghi.
+- Provider keys live in the OS keychain (Windows Credential Manager, macOS Keychain, Secret Service on Linux), not in the tool's files.
+- Some apps can only read a key from their own config file (Claude Code, Claude Desktop). The tool writes the key only to those places.
+- Every write is atomic and backed up. Backups are encrypted: DPAPI on Windows, AES-256-GCM with the key held in the keychain on macOS/Linux.
+- Keys never appear in logs, error messages, support reports or preset files.
+- **Restore defaults** (Restore page) has two modes:
+  - *Remove what the tool added*: removes only the tool's additions and keeps your other edits.
+  - *Back to original*: puts each file back exactly as it was before the tool first wrote it.
 
-## Gỡ lỗi
+## Troubleshooting
 
-- Chạy **Doctor** (Cài đặt hoặc Ctrl+K). Mỗi vấn đề có hướng xử lý.
-- Gateway trả 400 `reasoning_effort`: xóa biến `CLAUDE_CODE_EFFORT_LEVEL` (Doctor có nút Sửa) và để mức effort mặc định.
-- Gửi lỗi: Cài đặt → **Báo cáo hỗ trợ**. Key và thư mục người dùng đã được che, xem lại trước khi gửi.
-- Kiểm tra gateway bằng curl:
+- Run **Doctor** (Settings or Ctrl+K). Every issue comes with a fix.
+- Gateway returns HTTP 400 `reasoning_effort`: remove the `CLAUDE_CODE_EFFORT_LEVEL` variable (Doctor has a Fix button) and keep the default effort level.
+- Reporting a bug: Settings → **Support report**. Keys and user folders are masked; review it before sending.
+- Check the gateway with curl:
 
 ```sh
 curl -s "$BASE_URL/models" -H "Authorization: Bearer $API_KEY"
 ```
 
-## Build từ source
+## Build from source
 
-Cần Node 20+, Rust stable và [phụ thuộc hệ thống của Tauri](https://tauri.app/start/prerequisites/).
+Requires Node 20+, stable Rust and [Tauri's system dependencies](https://tauri.app/start/prerequisites/).
 
 ```sh
 npm ci
-npm run tauri dev      # chạy thử
-npm run tauri build    # đóng gói
+npm run tauri dev      # run
+npm run tauri build    # package
 cd src-tauri && cargo test
 ```
 
-## Giấy phép
+## Contributing
+
+Issues and pull requests are welcome, especially test reports from macOS and Linux. English is the source language for the UI (`src/i18n`); translations go in their own file, such as `vi.ts`.
+
+## License
 
 [MIT](LICENSE)

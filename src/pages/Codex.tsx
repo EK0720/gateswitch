@@ -5,7 +5,7 @@ import { locale, t, tr } from "../i18n";
 import { groupOf, statusText } from "./ModelTable";
 import { ImageGuidance } from "./ImageGuidance";
 
-const EFFORTS = [["default", "Mặc định"], ["low", "low"], ["medium", "medium"], ["high", "high"]] as const;
+const EFFORTS = [["default", "Default"], ["low", "low"], ["medium", "medium"], ["high", "high"]] as const;
 
 export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify: (t: string) => void; goProviders: () => void }) {
   const [providers, setProviders] = useState<Provider[] | null>(null);

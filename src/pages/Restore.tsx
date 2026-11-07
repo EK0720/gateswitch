@@ -19,7 +19,7 @@ const APPS: [string, string][] = [
 ];
 const appName = (id: string) => APPS.find(([a]) => a === id)?.[1] ?? id;
 
-/** "Khôi phục mặc định": one step back to before this tool, however many setups ran. */
+/** "Restore defaults": one step back to before this tool, however many setups ran. */
 function ResetCard({ notify, onDone }: { notify: (t: string) => void; onDone: () => void }) {
   const [apps, setApps] = useState<string[]>(APPS.map(([a]) => a));
   const [mode, setMode] = useState<"clean" | "original">("clean");

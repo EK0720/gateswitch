@@ -348,7 +348,7 @@ fn clear_stale_env(name: String) -> Result<(), String> {
     if !STALE_ENV.contains(&name.as_str()) {
         return Err("This variable is not in the list allowed to be removed".into());
     }
-    // Recorded like a setup so it shows in Khôi phục and can be undone.
+    // Recorded like a setup so it shows on the Restore page and can be undone.
     store()
         .apply_with_env(&format!("Remove variable {name}"), "Old environment variable causing gateway 400 errors", &[], &[(name, None)], Some((&UserEnv, &Keychain)))
         .map(|_| ())
@@ -372,7 +372,7 @@ async fn orca_restart() -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(|| rlog::done("Orca", restart::orca_daemon())).await.map_err(|e| e.to_string())?
 }
 
-/// What "Khôi phục mặc định" would change, per app. Read only.
+/// What "Restore defaults" would change, per app. Read only.
 #[tauri::command]
 async fn reset_preview(req: reset::Request) -> Result<Vec<reset::Item>, String> {
     tauri::async_runtime::spawn_blocking(move || reset::preview(&req)).await.map_err(|e| e.to_string())?

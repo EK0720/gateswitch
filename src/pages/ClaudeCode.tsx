@@ -5,7 +5,7 @@ import { locale, t, tr } from "../i18n";
 import { groupOf, statusText } from "./ModelTable";
 import { HeaderHelp } from "./HeaderHelp";
 
-const EFFORTS = [["default", "Mặc định"], ["low", "low"], ["medium", "medium"], ["high", "high"], ["max", "max"]] as const;
+const EFFORTS = [["default", "Default"], ["low", "low"], ["medium", "medium"], ["high", "high"], ["max", "max"]] as const;
 const effortLabel = (v: string, label: string) => (v === "default" ? t(label) : label);
 const AUTHS = [["bearer", "Bearer"], ["x-api-key", "x-api-key"]] as const;
 

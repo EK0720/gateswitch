@@ -1,4 +1,4 @@
-//! "Sử dụng": read token counts out of the logs the apps already keep.
+//! "Usage": read token counts out of the logs the apps already keep.
 //!
 //! Read only, and only when the page is opened. No background work.
 //! - Claude Code: ~/.claude/projects/**/*.jsonl, the `usage` block of assistant messages

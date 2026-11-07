@@ -1,37 +1,38 @@
 # Changelog
 
-## 0.2.0 (chưa phát hành)
+## 0.2.0
 
-### Thay đổi
-- Tiếng Anh là ngôn ngữ nguồn; thêm bản dịch tiếng Việt (`src/i18n/vi.ts`). Đổi ngôn ngữ ở thanh bên hoặc Cài đặt.
-- Codex: tên provider và biến môi trường mặc định là `gateway` / `GATEWAY_API_KEY` thay cho `ms-<id>` / `MS_<ID>_API_KEY`; sửa được ở Nâng cao. Setup lại sẽ thay bảng tên cũ và gỡ biến cũ nếu giữ cùng key (hoàn tác được).
-- Header tùy chỉnh theo nhà cung cấp: ghi vào `ANTHROPIC_CUSTOM_HEADERS` (Claude Code) và `inferenceCustomHeaders` (Claude Desktop). Trang Claude có mục gỡ lỗi 400 `reasoning_effort` với nút thêm header tương thích. Preset mang theo header (không chứa key).
-- Kiểm tra khả năng gateway: tích model ngay trong bảng model, kết quả hiện cạnh tên model.
-- Orca: bỏ form setup riêng. Orca tự mirror `~/.codex/config.toml`; trang Orca chỉ báo trạng thái, đồng bộ ngay và khởi động lại daemon.
-- Khi chạy trong terminal của Orca, tool bỏ qua `CODEX_HOME` do Orca gán và dùng `~/.codex`.
-- Claude Desktop: chọn và xóa cấu hình bất kỳ trong configLibrary, kể cả cấu hình tạo trong app hoặc bởi tool cũ.
-- Windows: thanh tiêu đề tích hợp thay khung cửa sổ mặc định. Thao tác phụ gom vào menu ⋯, giải thích dài chuyển vào ⓘ.
-- Codex: hướng dẫn tạo ảnh qua gateway (`/images/generations`, mặc định PNG nền trong suốt) ghi vào `AGENTS.md`, không chứa key, hoàn tác được.
-- Header sửa lỗi 400 `reasoning_effort` đổi thành giá trị trung tính `User-Agent: model-switcher/1` + `x-app: model-switcher`.
-- Restart Claude Desktop: chỉ tắt đúng Claude Desktop (không đụng Claude Code CLI), chờ tắt hẳn, mở lại và kiểm tra app đã chạy.
-- Restart Claude Desktop và Codex Desktop trên macOS (`osascript quit` → SIGTERM → SIGKILL, mở lại bằng `open -a`) và Claude Desktop trên Linux. Chưa chạy thử trên máy thật.
-- Ghi `restart.log` từng bước restart; báo cáo hỗ trợ kèm 60 dòng cuối.
-- Trang Sử dụng lưu kết quả từng file log (theo hash đường dẫn, kích thước, thời gian sửa), mở lại chỉ đọc file mới.
-- Bảng model: cột độ trễ riêng, nhãn hết quota theo nhóm, nút Thử hiện khi rê chuột.
-- Orca trên macOS/Linux: tìm Codex riêng của Orca theo đúng cách Orca chọn thư mục dữ liệu (`ORCA_USER_DATA_PATH`, `~/Library/Application Support/orca`, `$XDG_CONFIG_HOME/orca` hoặc `~/.config/orca`). Khởi động lại daemon Orca vẫn chỉ hỗ trợ Windows.
-- Bản macOS và Linux chưa test trên máy thật. Bản build chưa ký số và chưa tự cập nhật.
+### Changed
+- English is the source language; Vietnamese translation added (`src/i18n/vi.ts`). Switch language in the sidebar or Settings.
+- Codex: provider name and environment variable default to `gateway` / `GATEWAY_API_KEY` instead of `ms-<id>` / `MS_<ID>_API_KEY`; editable under Advanced. Setting up again replaces the old table and removes the old variable when it holds the same key (undoable).
+- Per-provider custom headers, written to `ANTHROPIC_CUSTOM_HEADERS` (Claude Code) and `inferenceCustomHeaders` (Claude Desktop). The Claude pages have a guide for HTTP 400 `reasoning_effort` with a button that adds compatible headers. Presets carry headers (never keys).
+- Gateway capability check: tick models right in the model table; results show next to the model name.
+- Orca: no separate setup form. Orca mirrors `~/.codex/config.toml` itself; the Orca page shows status, Sync now and daemon restart.
+- When run inside an Orca terminal, the tool ignores the `CODEX_HOME` Orca sets and uses `~/.codex`.
+- Claude Desktop: select and delete any entry in configLibrary, including ones created in the app or by older tools.
+- Windows: integrated title bar instead of the default window frame. Secondary actions moved into a ⋯ menu, long explanations into ⓘ.
+- Codex: image generation guidance through the gateway (`/images/generations`, transparent PNG by default) written to `AGENTS.md`. It names no gateway and holds no key; it follows the provider Codex is set up with and the image model chosen per gateway. Undoable.
+- The headers that fix HTTP 400 `reasoning_effort` are now neutral: `User-Agent: model-switcher/1` + `x-app: model-switcher`.
+- Restarting Claude Desktop closes only Claude Desktop (never the Claude Code CLI), waits for it to exit, reopens it and checks that it is running.
+- Restart Claude Desktop and Codex Desktop on macOS (`osascript quit` → SIGTERM → SIGKILL, reopen with `open -a`) and Claude Desktop on Linux. Not yet run on real machines.
+- Each restart step is logged to `restart.log`; support reports include the last 60 lines.
+- Usage page caches results per log file (by path hash, size and modified time); reopening reads only new files.
+- Model table: separate latency column, out-of-quota count per group, Try button shown on hover.
+- Orca on macOS/Linux: finds Orca's own Codex home the way Orca picks its data folder (`ORCA_USER_DATA_PATH`, `~/Library/Application Support/orca`, `$XDG_CONFIG_HOME/orca` or `~/.config/orca`). Restarting the Orca daemon is still Windows-only.
+- Desktop app enforces a strict Content Security Policy.
+- macOS and Linux builds have not been tested on real machines. Builds are not code-signed and do not auto-update.
 
-## 0.1.0 (chưa phát hành)
+## 0.1.0 (unreleased)
 
-Bản viết lại bằng Tauri 2 của Model Switcher.
+Tauri 2 rewrite of Model Switcher.
 
-### Thêm
-- Nhà cung cấp: lưu key trong keychain của hệ điều hành, tải danh sách model, đo độ trễ.
-- File preset gateway (`model-switcher/preset@1`): nhập từ file hoặc preset mẫu, xuất preset (không bao giờ chứa key).
-- Kiểm tra khả năng gateway theo từng model: endpoint, streaming, tool, prompt caching, ảnh.
-- Setup Codex (CLI, Desktop), Claude Code, Claude Desktop, Orca. Khởi động lại Codex Desktop và daemon Orca.
-- Mọi thay đổi ghi file đều nguyên tử, có bản sao lưu mã hóa (DPAPI trên Windows, AES-GCM với khóa trong keychain trên macOS/Linux) và hoàn tác được.
-- Khôi phục mặc định: một bước gỡ mọi thứ tool đã thêm, hoặc trả file về bản gốc trước lần đầu tool ghi. Bản thân thao tác này cũng hoàn tác được.
-- Doctor với nút sửa nhanh; báo cáo hỗ trợ đã che key.
-- Trang Sử dụng đọc log trên máy: token, tỉ lệ cache, ước tính chi phí theo giá người dùng nhập.
-- Bảng lệnh Ctrl+K, giao diện sáng/tối.
+### Added
+- Providers: keys stored in the OS keychain, model list fetch, latency check.
+- Gateway preset files (`model-switcher/preset@1`): import from a file or a sample preset, export presets (never containing keys).
+- Per-model gateway capability check: endpoint, streaming, tools, prompt caching, images.
+- Setup for Codex (CLI, Desktop), Claude Code, Claude Desktop, Orca. Restart Codex Desktop and the Orca daemon.
+- Every file write is atomic, with an encrypted backup (DPAPI on Windows, AES-GCM with the key in the keychain on macOS/Linux), and undoable.
+- Restore defaults: one step removes everything the tool added, or puts files back to the original before the tool first wrote them. This is itself undoable.
+- Doctor with one-click fixes; support report with keys masked.
+- Usage page reads local logs: tokens, cache hit rate, cost estimate at user-entered prices.
+- Ctrl+K command palette, light/dark theme.

@@ -7,10 +7,10 @@ import { locale, t, tr } from "../i18n";
 /** Rough cost of one probe: a "ping" prompt plus up to 16 output tokens. */
 export const TOKENS_PER_PROBE = 20;
 
-// Vietnamese keys; t() runs at call time so a language switch applies.
+// English keys; t() runs at call time so a language switch applies.
 const LABEL: Record<ProbeStatus, string> = {
-  ok: "Chạy", quota: "Hết quota", auth: "Key bị từ chối", missing: "Gateway không có model",
-  upstream: "Upstream lỗi", timeout: "Quá 30 giây", error: "Lỗi",
+  ok: "Works", quota: "Out of quota", auth: "Key rejected", missing: "Model not on gateway",
+  upstream: "Upstream error", timeout: "Timed out (30 s)", error: "Error",
 };
 const DOT: Record<ProbeStatus, string> = { ok: "ok", quota: "warn", auth: "bad", missing: "bad", upstream: "bad", timeout: "warn", error: "bad" };
 

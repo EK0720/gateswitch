@@ -48,9 +48,9 @@ const sample: Scan = {
     { id: "orca", name: "Orca", installed: false, path: null },
   ],
   ides: [
-    { id: "vscode", name: "VS Code", uses: ["codex", "claude"], codex: "Cài extension Codex (OpenAI) là dùng được.", claude: "Cài extension Claude Code (Anthropic) là dùng được." },
-    { id: "antigravity", name: "Antigravity", uses: ["codex", "claude"], codex: "Cài extension Codex (OpenAI) là dùng được.", claude: "Cài extension Claude Code (Anthropic) là dùng được." },
-    { id: "jetbrains", name: "JetBrains (Rider, IntelliJ…)", uses: ["codex", "claude"], codex: "Chọn Codex trong AI Chat.", claude: "Chọn Claude Agent trong AI Chat." },
+    { id: "vscode", name: "VS Code", uses: ["codex", "claude"], codex: "Install the Codex (OpenAI) extension to use it.", claude: "Install the Claude Code (Anthropic) extension to use it." },
+    { id: "antigravity", name: "Antigravity", uses: ["codex", "claude"], codex: "Install the Codex (OpenAI) extension to use it.", claude: "Install the Claude Code (Anthropic) extension to use it." },
+    { id: "jetbrains", name: "JetBrains (Rider, IntelliJ…)", uses: ["codex", "claude"], codex: "Choose Codex in AI Chat.", claude: "Choose Claude Agent in AI Chat." },
   ],
 };
 let sampleProviders: Provider[] = [
@@ -76,7 +76,7 @@ function probeModelsPreview(id: string, models: string[] | null): Promise<Provid
   const now = new Date().toISOString();
   const fake = (m: string): Probe =>
     m.startsWith("cx/") ? { status: "quota", latency_ms: null, message: "HTTP 429: usage limit reached", checked_at: now }
-    : m.startsWith("gcli/") ? { status: "timeout", latency_ms: null, message: "Không phản hồi sau 30 giây", checked_at: now }
+    : m.startsWith("gcli/") ? { status: "timeout", latency_ms: null, message: "No response after 30 seconds", checked_at: now }
     : { status: "ok", latency_ms: 400 + m.length * 20, message: "", checked_at: now };
   for (const m of models ?? p.models) p.probes[m] = fake(m);
   return new Promise((r) => setTimeout(() => r({ ...p, probes: { ...p.probes } }), 1200));
@@ -121,14 +121,14 @@ export const api = {
   claudeCurrent: (): Promise<ClaudeCurrent> =>
     inTauri ? invoke("claude_current") : preview({ model: "", base_url: "", auth: "", effort: "", picker: false, warnings: [] }),
   claudeSetup: (req: ClaudeRequest): Promise<{ change: Change; message: string }> =>
-    inTauri ? invoke("claude_setup", { req }) : preview({ change: { id: "y", time: new Date().toISOString(), title: "Setup Claude Code", detail: "", files: [], undone: false }, message: "Đã setup Claude Code" }),
+    inTauri ? invoke("claude_setup", { req }) : preview({ change: { id: "y", time: new Date().toISOString(), title: "Setup Claude Code", detail: "", files: [], undone: false }, message: "Claude Code set up" }),
 
   orcaStatus: (): Promise<OrcaStatus> =>
     inTauri ? invoke("orca_status") : preview({ config: true, runtime: "C:/…/codex.exe", catalog: null, provider: "gateway", model: "cx/gpt-6.1-sol", in_sync: false }),
   orcaSync: (): Promise<{ change: Change; message: string }> =>
-    inTauri ? invoke("orca_sync") : preview({ change: { id: "o", time: new Date().toISOString(), title: "Đồng bộ Codex sang Orca", detail: "", files: [], undone: false }, message: "Đã đồng bộ. Khởi động lại daemon để Orca nhận." }),
+    inTauri ? invoke("orca_sync") : preview({ change: { id: "o", time: new Date().toISOString(), title: "Sync Codex to Orca", detail: "", files: [], undone: false }, message: "Synced. Restart the daemon for Orca to apply it." }),
   claudeDesktopRemove: (ids: string[]): Promise<{ change: Change; message: string }> =>
-    inTauri ? invoke("claude_desktop_remove", { ids }) : preview({ change: { id: "d", time: new Date().toISOString(), title: "Xóa cấu hình Claude Desktop", detail: "", files: [], undone: false }, message: `Đã xóa ${ids.length} cấu hình. Thoát hẳn rồi mở lại Claude Desktop.` }),
+    inTauri ? invoke("claude_desktop_remove", { ids }) : preview({ change: { id: "d", time: new Date().toISOString(), title: "Remove Claude Desktop configurations", detail: "", files: [], undone: false }, message: `Removed ${ids.length} configuration(s). Quit and reopen Claude Desktop.` }),
   codexNames: (id: string): Promise<CodexNames> =>
     inTauri ? invoke("codex_names", { id }) : preview({ key: "gateway", env: "GATEWAY_API_KEY", old_keys: [], old_envs: [] }),
   setCodexNames: (id: string, name: string, env: string): Promise<CodexNames> =>
@@ -136,20 +136,20 @@ export const api = {
 
   claudeDesktopCurrent: (): Promise<DesktopCurrent> =>
     inTauri ? invoke("claude_desktop_current") : preview({ entries: [{ id: "e0", ours: false, name: "Default", base_url: "https://api.example.com", auth: "bearer", has_key: true, default_model: "", model_count: 0, discovery: true, headers: 0, applied: false }, { id: "e1", ours: true, name: "", base_url: "https://api.nghimmo.com", auth: "bearer", has_key: true, default_model: "cc/claude-opus-5.5[1m]", model_count: 6, discovery: null, headers: 2, applied: true }], effective: "e1", warnings: [] }),
-  claudeDesktopRestart: (): Promise<string> => (inTauri ? invoke("claude_desktop_restart") : preview("Đã khởi động lại Claude Desktop")),
+  claudeDesktopRestart: (): Promise<string> => (inTauri ? invoke("claude_desktop_restart") : preview("Restarted Claude Desktop")),
   codexDesktopRestart: (force: boolean): Promise<string> =>
-    inTauri ? invoke("codex_desktop_restart", { force }) : preview("Đã khởi động lại Codex Desktop"),
+    inTauri ? invoke("codex_desktop_restart", { force }) : preview("Restarted Codex Desktop"),
   supportReport: (): Promise<string> =>
     inTauri ? invoke("support_report") : preview(JSON.stringify({ app: "preview", os: "windows", doctor: [] }, null, 2)),
-  orcaRestart: (): Promise<string> => (inTauri ? invoke("orca_restart") : preview("Đã khởi động lại Codex trong Orca (12 model)")),
+  orcaRestart: (): Promise<string> => (inTauri ? invoke("orca_restart") : preview("Restarted Codex in Orca (12 models). Open a new Codex tab if the old one does not reconnect.")),
 
   claudeDesktopSetup: (req: DesktopRequest): Promise<{ change: Change; message: string }> =>
-    inTauri ? invoke("claude_desktop_setup", { req }) : preview({ change: { id: "z", time: new Date().toISOString(), title: "Setup Claude Desktop", detail: "", files: [], undone: false }, message: "Đã setup Claude Desktop" }),
+    inTauri ? invoke("claude_desktop_setup", { req }) : preview({ change: { id: "z", time: new Date().toISOString(), title: "Setup Claude Desktop", detail: "", files: [], undone: false }, message: "Claude Desktop set up" }),
 
   codexCurrent: (): Promise<CodexCurrent> =>
     inTauri ? invoke("codex_current") : preview({ model: "", provider: "", base_url: "", env_key: "", effort: "", catalog: false, provider_id: "" }),
   codexSetup: (req: CodexRequest): Promise<{ change: Change; message: string }> =>
-    inTauri ? invoke("codex_setup", { req }) : preview({ change: { id: "x", time: new Date().toISOString(), title: "Setup Codex", detail: "", files: [], undone: false }, message: "Đã setup Codex" }),
+    inTauri ? invoke("codex_setup", { req }) : preview({ change: { id: "x", time: new Date().toISOString(), title: "Setup Codex", detail: "", files: [], undone: false }, message: "Codex set up" }),
 
   codexImageStatus: (): Promise<ImageGuidance> =>
     inTauri ? invoke("codex_image_status") : preview({ path: "~/.codex/AGENTS.md", installed: false, outdated: false, models: {} }),
@@ -161,17 +161,17 @@ export const api = {
   usage: (): Promise<Usage> =>
     inTauri ? invoke("usage_stats") : preview({ claude: { input: 120000, cached: 90000, output: 4000 }, codex: { input: 3000000, cached: 2800000, output: 60000 }, orca: { input: 0, cached: 0, output: 0 }, days: [], by_model: {}, files: [2, 1, 0] }),
   doctor: (): Promise<Check[]> =>
-    inTauri ? invoke("doctor_run") : preview([{ level: "ok", app: "Codex", title: "Đã cài", detail: "codex" }]),
+    inTauri ? invoke("doctor_run") : preview([{ level: "ok", app: "Codex", title: "Installed", detail: "codex" }]),
   staleEnv: (): Promise<string[]> => (inTauri ? invoke("stale_env") : preview([])),
   clearStaleEnv: (name: string): Promise<void> => (inTauri ? invoke("clear_stale_env", { name }) : preview(undefined)),
 
   resetPreview: (req: ResetRequest): Promise<ResetItem[]> =>
-    inTauri ? invoke("reset_preview", { req }) : preview(req.apps.map((app) => ({ app, path: `~/${app}/config`, action: "edit", changes: ["Bỏ env ANTHROPIC_BASE_URL", "Bỏ model đã chọn"], has_original: true }))),
+    inTauri ? invoke("reset_preview", { req }) : preview(req.apps.map((app) => ({ app, path: `~/${app}/config`, action: "edit", changes: ["Remove env ANTHROPIC_BASE_URL", "Remove the selected model"], has_original: true }))),
   resetApply: (req: ResetRequest): Promise<Change> =>
-    inTauri ? invoke("reset_apply", { req }) : preview({ id: "r", time: new Date().toISOString(), title: "Khôi phục mặc định", detail: req.apps.join(", "), files: [], undone: false }),
+    inTauri ? invoke("reset_apply", { req }) : preview({ id: "r", time: new Date().toISOString(), title: "Restore defaults", detail: req.apps.join(", "), files: [], undone: false }),
 
   presetSamples: (): Promise<Preset[]> =>
-    inTauri ? invoke("preset_samples") : preview([{ schema: "model-switcher/preset@1", name: "9router (máy này)", base_url: "http://localhost:20128/v1", auth: null, models: [], defaults: {}, docs: null }]),
+    inTauri ? invoke("preset_samples") : preview([{ schema: "model-switcher/preset@1", name: "9router (this machine)", base_url: "http://localhost:20128/v1", auth: null, models: [], defaults: {}, docs: null }]),
   presetParse: (text: string): Promise<Preset> => (inTauri ? invoke("preset_parse", { text }) : preview(JSON.parse(text))),
   presetImport: (text: string, key: string): Promise<Provider> =>
     inTauri ? invoke("preset_import", { text, key }) : api.saveProvider({ id: null, name: JSON.parse(text).name, baseUrl: JSON.parse(text).base_url, key }),
@@ -181,7 +181,7 @@ export const api = {
   capabilityTest: (id: string, models: string[]): Promise<[string, Caps][]> =>
     inTauri
       ? invoke("capability_test", { id, models })
-      : preview(models.map((m): [string, Caps] => [m, { endpoint: { ok: true, latency_ms: 420, note: "" }, streaming: { ok: true, latency_ms: 610, note: "" }, tools: { ok: true, latency_ms: 800, note: "" }, caching: { ok: false, latency_ms: null, note: "Lần gọi thứ hai không có cached token" }, images: { ok: true, latency_ms: 900, note: "" } }])),
+      : preview(models.map((m): [string, Caps] => [m, { endpoint: { ok: true, latency_ms: 420, note: "" }, streaming: { ok: true, latency_ms: 610, note: "" }, tools: { ok: true, latency_ms: 800, note: "" }, caching: { ok: false, latency_ms: null, note: "The second call had no cached tokens" }, images: { ok: true, latency_ms: 900, note: "" } }])),
 };
 
 export type ResetRequest = { apps: string[]; mode: "clean" | "original" };

@@ -3,11 +3,11 @@ import { t, tr } from "../i18n";
 import { Info } from "./Info";
 
 const HINT: Record<string, string> = {
-  "codex-cli": "Cài: npm i -g @openai/codex",
-  "codex-desktop": "Tải từ trang OpenAI Codex",
-  "claude-cli": "Cài: npm i -g @anthropic-ai/claude-code",
-  "claude-desktop": "Tải từ claude.com/download",
-  orca: "Tải Orca từ trang phát hành",
+  "codex-cli": "Install: npm i -g @openai/codex",
+  "codex-desktop": "Download from the OpenAI Codex site",
+  "claude-cli": "Install: npm i -g @anthropic-ai/claude-code",
+  "claude-desktop": "Download from claude.com/download",
+  orca: "Download Orca from its releases page",
 };
 
 export function Apps({ scan }: { scan: Scan | null }) {

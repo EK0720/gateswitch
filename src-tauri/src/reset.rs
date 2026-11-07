@@ -1,4 +1,4 @@
-//! "Khôi phục mặc định": take every app back to how it was before this tool,
+//! "Restore defaults": take every app back to how it was before this tool,
 //! no matter how many setups happened since. Undo per change is not enough
 //! for that: after several setups (and edits by the user in between) undoing
 //! them one by one in the right order is hard.
