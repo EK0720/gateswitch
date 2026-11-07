@@ -1,0 +1,54 @@
+[package]
+name = "model-switcher-next"
+version = "0.2.0"
+description = "Switch gateway, API key and model for Codex, Claude Code, Claude Desktop and Orca"
+authors = ["EK0720"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "model_switcher_next_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+dirs = "7.0.0"
+sha2 = "0.11.1"
+chrono = "0.4.45"
+window-vibrancy = "0.8.1"
+toml_edit = "0.25.18"
+rand = "0.9"
+ring = "0.17"
+ureq = { version = "3.5.1", features = ["json"] }
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+[dev-dependencies]
+tempfile = "3.27.0"
+
+[target."cfg(windows)".dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Security_Cryptography"] }
+winreg = "0.56.0"
+
+# Dependencies (serde_json parses GBs of logs on the Usage page) are optimised
+# even in `tauri dev`; our own crate stays fast to rebuild.
+[profile.dev.package."*"]
+opt-level = 2

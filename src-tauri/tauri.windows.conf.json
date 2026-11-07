@@ -1,0 +1,17 @@
+{
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Model Switcher",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 860,
+        "minHeight": 560,
+        "transparent": true,
+        "decorations": false,
+        "shadow": true
+      }
+    ]
+  }
+}
