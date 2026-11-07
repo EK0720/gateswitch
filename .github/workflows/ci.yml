@@ -74,7 +74,8 @@ jobs:
       # Signing: fill these secrets before the first public release.
       # Windows: Azure Trusted Signing or an OV certificate (see Tauri docs "Windows Code Signing").
       # macOS: Developer ID + notarization via APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD,
-      #        APPLE_SIGNING_IDENTITY, APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID.
+      #        APPLE_SIGNING_IDENTITY, APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID (add them to env
+      #        below only once the secrets exist: empty values make the macOS build fail).
       - name: Build (draft release on tags)
         uses: tauri-apps/tauri-action@v0
         env:
@@ -82,12 +83,6 @@ jobs:
           # Signs the update packages (not the apps); the app checks this signature before installing an update.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           args: ${{ matrix.args }}
           tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
