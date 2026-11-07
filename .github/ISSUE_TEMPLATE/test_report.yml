@@ -1,0 +1,50 @@
+name: macOS / Linux test report
+description: Tell us how the build works on your machine (works or not, both help)
+labels: [test-report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        macOS and Linux builds have not been tested on real machines yet, so every report helps. **Never paste an API key.**
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS (Apple Silicon), macOS (Intel), Linux (AppImage), Linux (.deb), Other]
+    validations:
+      required: true
+  - type: input
+    id: osver
+    attributes:
+      label: OS version / distribution
+      placeholder: "macOS 16.1, Ubuntu 26.04…"
+  - type: input
+    id: version
+    attributes:
+      label: Model Switcher version
+    validations:
+      required: true
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: What worked?
+      options:
+        - label: App opens
+        - label: Add provider and fetch models
+        - label: Set up Codex
+        - label: Set up Claude Code
+        - label: Set up Claude Desktop
+        - label: Restart Claude Desktop / Codex Desktop from the app
+        - label: Orca detected and in sync
+        - label: Undo / Restore defaults
+  - type: textarea
+    id: notes
+    attributes:
+      label: What did not work?
+      placeholder: Error messages, screenshots, what you expected.
+  - type: textarea
+    id: report
+    attributes:
+      label: Support report
+      description: Settings → Support report (keys are masked; review before pasting).
+      render: json

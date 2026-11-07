@@ -1,79 +1,140 @@
+<div align="center">
+
+<img src="src-tauri/icons/128x128@2x.png" alt="" width="96">
+
 # Model Switcher
 
-**Point Codex, Claude Code, Claude Desktop and Orca at any OpenAI/Anthropic-compatible gateway in one click, and undo it just as easily.** Windows · macOS · Linux.
+### Use any AI gateway with Codex, Claude Code, Claude Desktop and Orca. One click to set up, one click to undo.
+
+[![Release](https://img.shields.io/github/v/release/EK0720/model-switcher?include_prereleases&label=release&color=6e56cf)](https://github.com/EK0720/model-switcher/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/EK0720/model-switcher/releases)
+[![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
+[![CI](https://github.com/EK0720/model-switcher/actions/workflows/ci.yml/badge.svg)](https://github.com/EK0720/model-switcher/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 **English** · [Tiếng Việt](README.vi.md)
 
-> Independent project. Not affiliated with OpenAI or Anthropic.
+<img src="docs/screenshots/overview.png" alt="Overview: every AI coding app, the gateway and model it uses, and what needs fixing" width="860">
 
-## Features
+</div>
 
-- **One place for every gateway**: add a provider (base URL + API key), fetch its model list, measure latency.
-- **One-click setup per app**: Codex CLI/Desktop, Claude Code, Claude Desktop (third-party inference), Orca.
-- **Gateway presets**: import a `.json` preset published by your gateway, or a sample preset (9router, LiteLLM, OpenRouter), then paste your key.
-- **Capability check**: real requests tell you whether the gateway supports streaming, tools, prompt caching and images, per model.
-- **Doctor**: finds broken config, stale environment variables that cause HTTP 400, proxies and managed policies, with one-click fixes.
-- **Usage**: token counts and cache hit rate from local logs, with cost estimates at prices you enter.
-- **Undo and Restore defaults**: every change can be undone; one step puts every app back the way it was before the tool.
+## Why Model Switcher?
+
+You have an OpenAI- or Anthropic-compatible gateway: LiteLLM, OpenRouter, a company proxy, a local router. Pointing every coding tool at it means hand-editing `config.toml`, `settings.json`, Claude Desktop's third-party config and environment variables, then remembering how to put it all back when something breaks.
+
+**Model Switcher** does it in one click, shows what each app is really using, and backs up every file it touches so any change can be undone.
+
+- **See everything at once**: which gateway and model Codex, Claude Code, Claude Desktop and Orca use right now, and what is misconfigured.
+- **Test before you switch**: check every model on a gateway (works, out of quota, key rejected, latency) and probe streaming, tools, prompt caching and images.
+- **Undo anything**: every change is one undoable step. **Restore defaults** puts every app back the way it was before the tool.
+- **Your keys stay yours**: stored in the OS keychain, masked in logs, errors, reports and presets. No telemetry, no account.
+- **Fixes the classic errors**: Doctor finds stale variables behind HTTP 400 `reasoning_effort`, broken config files, proxies and managed policies, with one-click fixes.
+- **Usage without uploads**: tokens, cache hit rate and cost estimates, read from logs already on your machine.
+- **Codex image generation** through your gateway, transparent PNG by default.
+- **Cross-platform**, English and Vietnamese, light and dark theme, Ctrl+K command palette.
+
+## Screenshots
+
+<table>
+<tr>
+<td align="center" width="50%"><img src="docs/screenshots/providers.png" alt="Providers: model table with status and latency" width="420"><br>Test every model on a gateway</td>
+<td align="center" width="50%"><img src="docs/screenshots/codex.png" alt="Codex page: gateway, model, /model menu, image generation" width="420"><br>Set up Codex in one click</td>
+</tr>
+<tr>
+<td align="center" colspan="2"><img src="docs/screenshots/usage.png" alt="Usage: tokens, cache hit rate, last 30 days, by app" width="640"><br>Usage from local logs, never uploaded</td>
+</tr>
+</table>
+
+<sub>Screenshots use made-up gateways and numbers.</sub>
 
 ## Download
 
-> **Note:** the Windows build has been tested on real machines. The **macOS and Linux builds have not been tested** on real machines yet (they are only built by CI). If something breaks, please open an issue and attach a support report (Settings → Support report).
+Get the latest build from [**Releases**](https://github.com/EK0720/model-switcher/releases).
 
-The builds are **not code-signed**, so your OS will warn you the first time:
+| OS | File |
+|---|---|
+| Windows 10/11 | `Model.Switcher_x.y.z_x64-setup.exe` or `.msi` |
+| macOS 11+ (Apple Silicon and Intel) | `Model.Switcher_x.y.z_universal.dmg` |
+| Linux | `.AppImage` or `.deb` |
 
-- **Windows** (SmartScreen "Windows protected your PC"): click **More info → Run anyway**.
-- **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
-- **Linux** (AppImage): `chmod +x model-switcher*.AppImage`, then run it.
+> [!IMPORTANT]
+> Windows is tested on real machines. **macOS and Linux builds have not been tested on real machines yet** (they are built by CI). If you try one, a [test report](https://github.com/EK0720/model-switcher/issues/new?template=test_report.yml) (works or not) helps a lot.
 
-There is no auto-update; check [Releases](../../releases) for new versions.
-
-Get the installer from [Releases](../../releases) and compare its SHA-256 with the one listed on the release page before running it:
-
-```powershell
-Get-FileHash .\Model.Switcher_x64-setup.exe -Algorithm SHA256
-```
-
-```sh
-shasum -a 256 Model.Switcher*.dmg   # macOS
-sha256sum model-switcher*.AppImage  # Linux
-```
+> [!NOTE]
+> Builds are **not code-signed** yet, so the first launch shows a warning:
+> - **Windows** (SmartScreen "Windows protected your PC"): **More info → Run anyway**.
+> - **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
+> - **Linux** (AppImage): `chmod +x model-switcher*.AppImage`, then run it.
+>
+> Compare the file's SHA-256 with the one on the release page: `Get-FileHash <file> -Algorithm SHA256` (Windows), `shasum -a 256 <file>` (macOS), `sha256sum <file>` (Linux).
 
 ## Quick start
 
-1. **Providers → Add** (or **Import preset**): enter the base URL (usually ending in `/v1`) and the API key.
-2. Click **Fetch models**.
-3. Open the page for the app you use (Codex, Claude Code…), pick the provider and model, click **Set up**. Restart the app.
+1. **Providers → Add provider** (or **Import preset**): enter the base URL (usually ending in `/v1`) and the API key.
+2. **Fetch models**, then **Test models** to see which ones work.
+3. Open your app's page (Codex, Claude Code…), pick the provider and model, click **Set up**. Restart the app.
 
-## Supported apps
+Changed your mind? **Restore → Undo** on that change, or **Restore defaults** for everything.
 
-| App | File changed | Notes |
+## What it changes
+
+| App | File | Notes |
 |---|---|---|
-| Codex CLI / Desktop | `~/.codex/config.toml` | Provider name and key variable default to `gateway` / `GATEWAY_API_KEY` (the gateway's name is not exposed), editable under Advanced; adds a catalog for the `/model` menu |
-| Claude Code | `~/.claude/settings.json` | Adds a "From gateway" entry to the `/model` menu |
-| Claude Desktop | Third-party inference `configLibrary` | Not written if the machine has a managed policy; can also delete old entries the tool did not create (undoable) |
-| Orca | No separate setup | Orca copies `~/.codex/config.toml` into its own Codex home; the tool shows whether it is in sync, with Sync now and daemon restart |
+| Codex CLI / Desktop | `~/.codex/config.toml` | Provider and key variable default to `gateway` / `GATEWAY_API_KEY` so the gateway's name is not exposed (editable under Advanced). Adds the gateway's models to `/model` |
+| Claude Code | `~/.claude/settings.json` | Adds a "From gateway" entry to `/model`. Your other settings, hooks and permissions are kept |
+| Claude Desktop | Third-party inference `configLibrary` | Skipped if the machine has a managed policy. Can also remove old entries the tool did not create (undoable) |
+| Orca | Nothing extra | Orca copies `~/.codex/config.toml` into its own Codex home; the tool shows whether it is in sync, with Sync now and daemon restart |
 
-## Security and undo
+## FAQ
 
-- Provider keys live in the OS keychain (Windows Credential Manager, macOS Keychain, Secret Service on Linux), not in the tool's files.
-- Some apps can only read a key from their own config file (Claude Code, Claude Desktop). The tool writes the key only to those places.
-- Every write is atomic and backed up. Backups are encrypted: DPAPI on Windows, AES-256-GCM with the key held in the keychain on macOS/Linux.
-- Keys never appear in logs, error messages, support reports or preset files.
-- **Restore defaults** (Restore page) has two modes:
-  - *Remove what the tool added*: removes only the tool's additions and keeps your other edits.
-  - *Back to original*: puts each file back exactly as it was before the tool first wrote it.
+<details>
+<summary><strong>Is my API key safe?</strong></summary>
 
-## Troubleshooting
+Keys live in the OS keychain (Windows Credential Manager, macOS Keychain, Secret Service on Linux). They are written only where an app cannot read them any other way (Claude Code's `settings.json`, Claude Desktop's config). Keys never appear in logs, error messages, support reports or preset files. File backups are encrypted (DPAPI on Windows, AES-256-GCM with the key in the keychain elsewhere). The app talks only to the gateways you add; there is no telemetry.
 
-- Run **Doctor** (Settings or Ctrl+K). Every issue comes with a fix.
-- Gateway returns HTTP 400 `reasoning_effort`: remove the `CLAUDE_CODE_EFFORT_LEVEL` variable (Doctor has a Fix button) and keep the default effort level.
-- Reporting a bug: Settings → **Support report**. Keys and user folders are masked; review it before sending.
-- Check the gateway with curl:
+</details>
 
-```sh
-curl -s "$BASE_URL/models" -H "Authorization: Bearer $API_KEY"
-```
+<details>
+<summary><strong>How do I go back to the official OpenAI / Anthropic login?</strong></summary>
+
+**Restore → Restore defaults**. *Remove what the tool added* keeps your own edits; *Back to original* puts every file back exactly as it was before the tool first wrote it. Both can be undone too.
+
+</details>
+
+<details>
+<summary><strong>Do I need to restart the apps after switching?</strong></summary>
+
+Yes. Codex, Claude Code and Claude Desktop read their config at launch. Codex Desktop and Claude Desktop pages have a **Restart** button; start a new Claude Code or Codex CLI session in the terminal. For Orca, use **Restart daemon** on the Orca page.
+
+</details>
+
+<details>
+<summary><strong>Claude Code says HTTP 400 <code>reasoning_effort</code></strong></summary>
+
+Some gateways reject the effort parameter. Run **Doctor**: it removes a stale `CLAUDE_CODE_EFFORT_LEVEL` variable in one click. If the gateway detects Claude Code by its headers, the Claude Code page can add neutral compatibility headers.
+
+</details>
+
+<details>
+<summary><strong>Which gateways work?</strong></summary>
+
+Any gateway with an OpenAI-compatible `/v1/models` and `/v1/chat/completions` or `/v1/responses` (for Codex), and an Anthropic-compatible `/v1/messages` (for Claude Code and Claude Desktop). **Test models** tells you what a given gateway supports. To check by hand: `curl -s "$BASE_URL/models" -H "Authorization: Bearer $API_KEY"`.
+
+</details>
+
+<details>
+<summary><strong>How is this different from CC Switch?</strong></summary>
+
+[CC Switch](https://github.com/farion1231/cc-switch) is a great, broader tool: more CLIs, local routing, MCP and skills management. Model Switcher is narrower and focuses on changing configs safely: every write is undoable with encrypted backups, Restore defaults returns all apps to their original state, models are tested per gateway before you switch, Doctor fixes known gateway errors, and Orca is supported. Pick the one that fits.
+
+</details>
+
+<details>
+<summary><strong>Something broke. How do I report it?</strong></summary>
+
+Settings → **Support report** creates a report with keys and user folders masked. Review it, then open a [bug report](https://github.com/EK0720/model-switcher/issues/new?template=bug_report.yml). Security problems: please report privately, see [SECURITY.md](SECURITY.md).
+
+</details>
 
 ## Build from source
 
@@ -81,15 +142,19 @@ Requires Node 20+, stable Rust and [Tauri's system dependencies](https://tauri.a
 
 ```sh
 npm ci
-npm run tauri dev      # run
+npm run tauri dev      # run with hot reload
 npm run tauri build    # package
 cd src-tauri && cargo test
 ```
 
 ## Contributing
 
-Issues and pull requests are welcome, especially test reports from macOS and Linux. English is the source language for the UI (`src/i18n`); translations go in their own file, such as `vi.ts`.
+Issues and pull requests are welcome. Most wanted right now: **macOS and Linux test reports** and **translations**. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=EK0720/model-switcher&type=Date)](https://www.star-history.com/#EK0720/model-switcher&Date)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Independent project, not affiliated with OpenAI or Anthropic.

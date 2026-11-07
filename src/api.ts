@@ -45,7 +45,7 @@ const sample: Scan = {
     { id: "codex-desktop", name: "Codex Desktop", installed: true, path: null },
     { id: "claude-cli", name: "Claude Code CLI", installed: true, path: "claude" },
     { id: "claude-desktop", name: "Claude Desktop", installed: true, path: null },
-    { id: "orca", name: "Orca", installed: false, path: null },
+    { id: "orca", name: "Orca", installed: true, path: null },
   ],
   ides: [
     { id: "vscode", name: "VS Code", uses: ["codex", "claude"], codex: "Install the Codex (OpenAI) extension to use it.", claude: "Install the Claude Code (Anthropic) extension to use it." },
@@ -53,19 +53,49 @@ const sample: Scan = {
     { id: "jetbrains", name: "JetBrains (Rider, IntelliJ…)", uses: ["codex", "claude"], codex: "Choose Codex in AI Chat.", claude: "Choose Claude Agent in AI Chat." },
   ],
 };
+// Fictional gateways and models for the browser preview and screenshots.
+const sampleModels = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "gpt-6", "gpt-6-mini", "gemini-3-pro", "deepseek-v4", "qwen-4-coder", "image-gen-2"];
+const sampleNow = new Date().toISOString();
+const ok = (ms: number): Probe => ({ status: "ok", latency_ms: ms, message: "", checked_at: sampleNow });
 let sampleProviders: Provider[] = [
   {
-    id: "9router", name: "9router", base_url: "http://localhost:20128/v1",
-    models: ["cc/claude-opus-5.5[1m]", "cc/claude-sonnet-5", "combo-smart", "cx/gpt-6-astra", "cx/gpt-6.1-sol", "gcli/gemini-3-pro"],
-    latency_ms: 142, checked_at: new Date().toISOString(), has_key: true,
-    info: {
-      "cc/claude-opus-5.5[1m]": { owned_by: "cc", capabilities: [] }, "cc/claude-sonnet-5": { owned_by: "cc", capabilities: [] },
-      "combo-smart": { owned_by: "combo", capabilities: [] }, "cx/gpt-6-astra": { owned_by: "cx", capabilities: [] },
-      "cx/gpt-6.1-sol": { owned_by: "cx", capabilities: [] }, "gcli/gemini-3-pro": { owned_by: "gcli", capabilities: [] },
+    id: "northwind", name: "Northwind AI", base_url: "https://api.northwind.example/v1",
+    models: sampleModels,
+    latency_ms: 142, checked_at: sampleNow, has_key: true,
+    info: Object.fromEntries(sampleModels.map((m) => [m, { owned_by: m.split("-")[0], capabilities: [] }])),
+    probes: {
+      "claude-opus-5-5": ok(1180), "claude-sonnet-5-5": ok(640), "claude-haiku-5-5": ok(310),
+      "gpt-6": ok(890), "gpt-6-mini": { status: "quota", latency_ms: null, message: "HTTP 429: usage limit reached", checked_at: sampleNow },
+      "gemini-3-pro": ok(720), "deepseek-v4": ok(560),
     },
-    probes: {},
+  },
+  {
+    id: "local", name: "Local router", base_url: "http://localhost:4000/v1",
+    models: ["qwen-4-coder", "llama-5-70b"], latency_ms: 9, checked_at: sampleNow, has_key: true,
+    info: {}, probes: {},
+  },
+  {
+    id: "acme", name: "Acme Cloud", base_url: "https://llm.acme.example/v1",
+    models: ["gpt-6", "claude-sonnet-5-5"], latency_ms: 233, checked_at: sampleNow, has_key: true,
+    info: {}, probes: {},
   },
 ];
+
+function sampleUsage(): Usage {
+  const days: DayStat[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5);
+    const w = d.getDay() === 0 || d.getDay() === 6 ? 0.35 : 1;
+    const input = Math.round((1.2e6 + 0.9e6 * Math.sin(i / 3) ** 2) * w);
+    days.push({ day: d.toISOString().slice(0, 10), input, cached: Math.round(input * 0.86), output: Math.round(input * 0.03) });
+  }
+  const by = (i: number, c: number, o: number): Totals => ({ input: i, cached: c, output: o });
+  return {
+    claude: by(18.4e6, 16.1e6, 0.52e6), codex: by(21.7e6, 18.9e6, 0.61e6), orca: by(2.1e6, 1.7e6, 0.07e6), days,
+    by_model: { "claude-opus-5-5": by(11.2e6, 9.9e6, 0.31e6), "gpt-6": by(14.8e6, 12.9e6, 0.41e6), "claude-sonnet-5-5": by(7.2e6, 6.2e6, 0.21e6), "gpt-6-mini": by(6.9e6, 6.0e6, 0.2e6), "gemini-3-pro": by(2.1e6, 1.7e6, 0.07e6) },
+    files: [214, 167, 23],
+  };
+}
 
 function preview<T>(value: T): Promise<T> {
   return new Promise((r) => setTimeout(() => r(value), 300));
@@ -119,12 +149,12 @@ export const api = {
   },
 
   claudeCurrent: (): Promise<ClaudeCurrent> =>
-    inTauri ? invoke("claude_current") : preview({ model: "", base_url: "", auth: "", effort: "", picker: false, warnings: [] }),
+    inTauri ? invoke("claude_current") : preview({ model: "claude-opus-5-5", base_url: "https://api.northwind.example", auth: "bearer", effort: "", picker: true, warnings: [] }),
   claudeSetup: (req: ClaudeRequest): Promise<{ change: Change; message: string }> =>
     inTauri ? invoke("claude_setup", { req }) : preview({ change: { id: "y", time: new Date().toISOString(), title: "Setup Claude Code", detail: "", files: [], undone: false }, message: "Claude Code set up" }),
 
   orcaStatus: (): Promise<OrcaStatus> =>
-    inTauri ? invoke("orca_status") : preview({ config: true, runtime: "C:/…/codex.exe", catalog: null, provider: "gateway", model: "cx/gpt-6.1-sol", in_sync: false }),
+    inTauri ? invoke("orca_status") : preview({ config: true, runtime: "C:/…/codex.exe", catalog: null, provider: "gateway", model: "gpt-6", in_sync: true }),
   orcaSync: (): Promise<{ change: Change; message: string }> =>
     inTauri ? invoke("orca_sync") : preview({ change: { id: "o", time: new Date().toISOString(), title: "Sync Codex to Orca", detail: "", files: [], undone: false }, message: "Synced. Restart the daemon for Orca to apply it." }),
   claudeDesktopRemove: (ids: string[]): Promise<{ change: Change; message: string }> =>
@@ -135,7 +165,7 @@ export const api = {
     inTauri ? invoke("set_codex_names", { id, name, env }) : preview({ key: name || "gateway", env: env || "GATEWAY_API_KEY", old_keys: [], old_envs: [] }),
 
   claudeDesktopCurrent: (): Promise<DesktopCurrent> =>
-    inTauri ? invoke("claude_desktop_current") : preview({ entries: [{ id: "e0", ours: false, name: "Default", base_url: "https://api.example.com", auth: "bearer", has_key: true, default_model: "", model_count: 0, discovery: true, headers: 0, applied: false }, { id: "e1", ours: true, name: "", base_url: "https://api.nghimmo.com", auth: "bearer", has_key: true, default_model: "cc/claude-opus-5.5[1m]", model_count: 6, discovery: null, headers: 2, applied: true }], effective: "e1", warnings: [] }),
+    inTauri ? invoke("claude_desktop_current") : preview({ entries: [{ id: "e0", ours: false, name: "Default", base_url: "https://api.anthropic.com", auth: "bearer", has_key: true, default_model: "", model_count: 0, discovery: true, headers: 0, applied: false }, { id: "e1", ours: true, name: "", base_url: "https://api.northwind.example/v1", auth: "bearer", has_key: true, default_model: "claude-opus-5-5", model_count: 9, discovery: null, headers: 2, applied: true }], effective: "e1", warnings: [] }),
   claudeDesktopRestart: (): Promise<string> => (inTauri ? invoke("claude_desktop_restart") : preview("Restarted Claude Desktop")),
   codexDesktopRestart: (force: boolean): Promise<string> =>
     inTauri ? invoke("codex_desktop_restart", { force }) : preview("Restarted Codex Desktop"),
@@ -147,19 +177,19 @@ export const api = {
     inTauri ? invoke("claude_desktop_setup", { req }) : preview({ change: { id: "z", time: new Date().toISOString(), title: "Setup Claude Desktop", detail: "", files: [], undone: false }, message: "Claude Desktop set up" }),
 
   codexCurrent: (): Promise<CodexCurrent> =>
-    inTauri ? invoke("codex_current") : preview({ model: "", provider: "", base_url: "", env_key: "", effort: "", catalog: false, provider_id: "" }),
+    inTauri ? invoke("codex_current") : preview({ model: "gpt-6", provider: "gateway", base_url: "https://api.northwind.example/v1", env_key: "GATEWAY_API_KEY", effort: "high", catalog: true, provider_id: "northwind" }),
   codexSetup: (req: CodexRequest): Promise<{ change: Change; message: string }> =>
     inTauri ? invoke("codex_setup", { req }) : preview({ change: { id: "x", time: new Date().toISOString(), title: "Setup Codex", detail: "", files: [], undone: false }, message: "Codex set up" }),
 
   codexImageStatus: (): Promise<ImageGuidance> =>
-    inTauri ? invoke("codex_image_status") : preview({ path: "~/.codex/AGENTS.md", installed: false, outdated: false, models: {} }),
+    inTauri ? invoke("codex_image_status") : preview({ path: "~/.codex/AGENTS.md", installed: true, outdated: false, models: { "https://api.northwind.example/v1": "image-gen-2" } }),
   codexImageSetup: (providerId: string, model: string): Promise<{ change: Change; message: string }> =>
     inTauri ? invoke("codex_image_setup", { providerId, model }) : preview({ change: { id: "i", time: new Date().toISOString(), title: "Codex image guidance", detail: "", files: [], undone: false }, message: "Image guidance added to AGENTS.md" }),
   codexImageRemove: (): Promise<{ change: Change; message: string }> =>
     inTauri ? invoke("codex_image_remove") : preview({ change: { id: "j", time: new Date().toISOString(), title: "Remove Codex image guidance", detail: "", files: [], undone: false }, message: "Image guidance removed" }),
 
   usage: (): Promise<Usage> =>
-    inTauri ? invoke("usage_stats") : preview({ claude: { input: 120000, cached: 90000, output: 4000 }, codex: { input: 3000000, cached: 2800000, output: 60000 }, orca: { input: 0, cached: 0, output: 0 }, days: [], by_model: {}, files: [2, 1, 0] }),
+    inTauri ? invoke("usage_stats") : preview(sampleUsage()),
   doctor: (): Promise<Check[]> =>
     inTauri ? invoke("doctor_run") : preview([{ level: "ok", app: "Codex", title: "Installed", detail: "codex" }]),
   staleEnv: (): Promise<string[]> => (inTauri ? invoke("stale_env") : preview([])),
@@ -171,12 +201,12 @@ export const api = {
     inTauri ? invoke("reset_apply", { req }) : preview({ id: "r", time: new Date().toISOString(), title: "Restore defaults", detail: req.apps.join(", "), files: [], undone: false }),
 
   presetSamples: (): Promise<Preset[]> =>
-    inTauri ? invoke("preset_samples") : preview([{ schema: "model-switcher/preset@1", name: "9router (this machine)", base_url: "http://localhost:20128/v1", auth: null, models: [], defaults: {}, docs: null }]),
+    inTauri ? invoke("preset_samples") : preview([{ schema: "model-switcher/preset@1", name: "Local router", base_url: "http://localhost:4000/v1", auth: null, models: [], defaults: {}, docs: null }]),
   presetParse: (text: string): Promise<Preset> => (inTauri ? invoke("preset_parse", { text }) : preview(JSON.parse(text))),
   presetImport: (text: string, key: string): Promise<Provider> =>
     inTauri ? invoke("preset_import", { text, key }) : api.saveProvider({ id: null, name: JSON.parse(text).name, baseUrl: JSON.parse(text).base_url, key }),
   presetExport: (id: string): Promise<string> =>
-    inTauri ? invoke("preset_export", { id }) : preview(JSON.stringify({ schema: "model-switcher/preset@1", name: id, base_url: "http://localhost:20128/v1", models: [] }, null, 2)),
+    inTauri ? invoke("preset_export", { id }) : preview(JSON.stringify({ schema: "model-switcher/preset@1", name: id, base_url: "https://api.northwind.example/v1", models: [] }, null, 2)),
 
   capabilityTest: (id: string, models: string[]): Promise<[string, Caps][]> =>
     inTauri
