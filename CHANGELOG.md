@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+### Changed
+- Linux `.deb`/`.rpm` docs: these packages also update in-app (asking for an admin password).
+- First release delivered through the in-app updater.
+
 ## 0.2.1
 
 ### Changed
