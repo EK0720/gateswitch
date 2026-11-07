@@ -77,7 +77,7 @@ pub fn run() -> Vec<Check> {
         doc.get("model_catalog_json").and_then(|i| i.as_str()).map(|s| crate::codex::is_owned_catalog(s, &crate::data_dir())).unwrap_or(false)
     };
     if codex.catalog && !catalog_owned {
-        out.push(Check { level: "warn", app: "Codex".into(), title: "Catalog was not created by this tool".into(), detail: "model_catalog_json points to a file from an old Model Switcher version. Set up again on the Codex page to use the new catalog.".into(), fix: Some("page:codex".into()) });
+        out.push(Check { level: "warn", app: "Codex".into(), title: "Catalog was not created by this tool".into(), detail: "model_catalog_json points to a file from an old version of this tool. Set up again on the Codex page to use the new catalog.".into(), fix: Some("page:codex".into()) });
     }
     let owned = crate::codex::owned_keys(&crate::providers().list(&crate::secrets::Keychain));
     if crate::codex::is_owned_key(&codex.provider, &owned) {
@@ -93,7 +93,7 @@ pub fn run() -> Vec<Check> {
             out.push(Check { level: "warn", app: "Codex".into(), title: "No catalog for the /model menu".into(), detail: "Enable the catalog when setting up again so /model lists the gateway's models.".into(), fix: Some("page:codex".into()) });
         }
     } else if !codex.provider.is_empty() {
-        out.push(Check { level: "ok", app: "Codex".into(), title: format!("Using provider {}", codex.provider), detail: "Not a gateway set up by Model Switcher.".into(), fix: None });
+        out.push(Check { level: "ok", app: "Codex".into(), title: format!("Using provider {}", codex.provider), detail: "Not a gateway set up by Gateswitch.".into(), fix: None });
     } else {
         out.push(Check { level: "warn", app: "Codex".into(), title: "No provider configured".into(), detail: "Set it up on the Codex page.".into(), fix: Some("page:codex".into()) });
     }

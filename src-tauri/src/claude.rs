@@ -14,9 +14,9 @@ use serde_json::{json, Map, Value};
 use std::path::PathBuf;
 
 /// Description we put on our modelPicker entries; marks the list as ours.
-pub const PICKER_MARK: &str = "From gateway (Model Switcher)";
-/// Mark written by builds before 0.2; still recognised as ours.
-const LEGACY_PICKER_MARK: &str = "Từ gateway (Model Switcher)";
+pub const PICKER_MARK: &str = "From gateway (Gateswitch)";
+/// Marks written by earlier builds (before the rename to Gateswitch); still recognised as ours.
+const LEGACY_PICKER_MARKS: &[&str] = &["From gateway (Model Switcher)", "Từ gateway (Model Switcher)"];
 
 /// Env keys that decide routing. Cleared before every setup so an old gateway,
 /// a stale model pin or a cloud-provider switch can't win over the new one.
@@ -85,7 +85,7 @@ fn parse(text: &str) -> Result<Map<String, Value>, String> {
 pub(crate) fn is_owned_picker(v: Option<&Value>) -> bool {
     v.and_then(|p| p.get("options"))
         .and_then(|o| o.as_array())
-        .map(|a| !a.is_empty() && a.iter().all(|e| e.get("description").and_then(|d| d.as_str()) .map(|d| d == PICKER_MARK || d == LEGACY_PICKER_MARK) == Some(true)))
+        .map(|a| !a.is_empty() && a.iter().all(|e| e.get("description").and_then(|d| d.as_str()) .map(|d| d == PICKER_MARK || LEGACY_PICKER_MARKS.contains(&d)) == Some(true)))
         .unwrap_or(false)
 }
 

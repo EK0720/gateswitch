@@ -349,7 +349,7 @@ mod win {
         let mut rpc = Rpc { stdin, rx, end: Instant::now() + Duration::from_secs(12) };
         let result = (|| {
             let v = env!("CARGO_PKG_VERSION");
-            rpc.call(1, "initialize", serde_json::json!({ "clientInfo": { "name": "model-switcher", "version": v } }))?;
+            rpc.call(1, "initialize", serde_json::json!({ "clientInfo": { "name": "gateswitch", "version": v } }))?;
             rpc.send(serde_json::json!({ "method": "initialized" }))?;
             let mut out = HashSet::new();
             let mut cursor: Option<String> = None;

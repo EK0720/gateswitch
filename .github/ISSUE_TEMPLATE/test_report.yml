@@ -21,7 +21,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Model Switcher version
+      label: Gateswitch version
     validations:
       required: true
   - type: checkboxes

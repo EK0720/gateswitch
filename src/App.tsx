@@ -121,7 +121,7 @@ export default function App() {
       <aside className="side" aria-label={t("Navigation")}>
         <div className="drag" data-tauri-drag-region />
         <div className="brand">
-          <span className="logo"><Icon name="plug" /></span>Model Switcher
+          <span className="logo"><Icon name="plug" /></span>Gateswitch
         </div>
         <div className="search" role="button" tabIndex={0} onClick={() => setPalette(true)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setPalette(true); }}>
           <Icon name="search" />{t("Search")}<kbd>Ctrl K</kbd>
@@ -160,7 +160,7 @@ export default function App() {
           <div className="update-bar" role="status">
             <Icon name="dl" />
             <span>{t("Version {v} is available.", { v: update.version })}</span>
-            <button className="link" onClick={() => openUrl(`https://github.com/EK0720/model-switcher/releases/tag/v${update.version}`).catch(() => {})}>{t("What's new")}</button>
+            <button className="link" onClick={() => openUrl(`https://github.com/EK0720/gateswitch/releases/tag/v${update.version}`).catch(() => {})}>{t("What's new")}</button>
             <span className="grow" />
             <button className="btn ghost small" onClick={dismiss}>{t("Later")}</button>
             <button className="btn primary small" onClick={installUpdate}>{t("Update and restart")}</button>

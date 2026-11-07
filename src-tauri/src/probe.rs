@@ -134,7 +134,7 @@ fn post(agent: &ureq::Agent, url: &str, key: &str, body: serde_json::Value) -> R
         .header("anthropic-version", "2023-06-01")
         .header("Accept", "application/json, text/event-stream")
         // Some gateways sit behind Cloudflare rules that block unknown clients.
-        .header("User-Agent", concat!("model-switcher/", env!("CARGO_PKG_VERSION")))
+        .header("User-Agent", concat!("gateswitch/", env!("CARGO_PKG_VERSION")))
         .send_json(body);
     match res {
         Ok(mut r) => {
@@ -236,7 +236,7 @@ fn check_of(reply: Reply, started: Instant, key: &str, ok_if: impl Fn(&str) -> R
 /// A long, stable prefix so a second identical call can hit the prompt cache
 /// (providers only cache prompts above ~1024 tokens).
 fn cache_prompt() -> String {
-    let line = "Model Switcher cache probe. This paragraph is repeated to exceed the minimum cacheable prompt length. ";
+    let line = "Gateswitch cache probe. This paragraph is repeated to exceed the minimum cacheable prompt length. ";
     line.repeat(70)
 }
 

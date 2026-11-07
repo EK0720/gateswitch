@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/EK0720/model-switcher/discussions
+    url: https://github.com/EK0720/gateswitch/discussions
     about: Ask how to set up a gateway or suggest a feature.
   - name: Security problem
-    url: https://github.com/EK0720/model-switcher/security/advisories/new
+    url: https://github.com/EK0720/gateswitch/security/advisories/new
     about: Report privately, not as a public issue.

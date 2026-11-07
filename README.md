@@ -2,14 +2,16 @@
 
 <img src="src-tauri/icons/128x128@2x.png" alt="" width="96">
 
-# Model Switcher
+# Gateswitch
 
 ### Use any AI gateway with Codex, Claude Code, Claude Desktop and Orca. One click to set up, one click to undo.
 
-[![Release](https://img.shields.io/github/v/release/EK0720/model-switcher?include_prereleases&label=release&color=6e56cf)](https://github.com/EK0720/model-switcher/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/EK0720/model-switcher/releases)
+<sub>A model and gateway switcher for AI coding tools: OpenAI- and Anthropic-compatible endpoints, LiteLLM, OpenRouter, local routers. Formerly <i>Model Switcher</i>.</sub>
+
+[![Release](https://img.shields.io/github/v/release/EK0720/gateswitch?include_prereleases&label=release&color=6e56cf)](https://github.com/EK0720/gateswitch/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/EK0720/gateswitch/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
-[![CI](https://github.com/EK0720/model-switcher/actions/workflows/ci.yml/badge.svg)](https://github.com/EK0720/model-switcher/actions/workflows/ci.yml)
+[![CI](https://github.com/EK0720/gateswitch/actions/workflows/ci.yml/badge.svg)](https://github.com/EK0720/gateswitch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 **English** · [Tiếng Việt](README.vi.md)
@@ -18,11 +20,11 @@
 
 </div>
 
-## Why Model Switcher?
+## Why Gateswitch?
 
 You have an OpenAI- or Anthropic-compatible gateway: LiteLLM, OpenRouter, a company proxy, a local router. Pointing every coding tool at it means hand-editing `config.toml`, `settings.json`, Claude Desktop's third-party config and environment variables, then remembering how to put it all back when something breaks.
 
-**Model Switcher** does it in one click, shows what each app is really using, and backs up every file it touches so any change can be undone.
+**Gateswitch** does it in one click, shows what each app is really using, and backs up every file it touches so any change can be undone.
 
 - **See everything at once**: which gateway and model Codex, Claude Code, Claude Desktop and Orca use right now, and what is misconfigured.
 - **Test before you switch**: check every model on a gateway (works, out of quota, key rejected, latency) and probe streaming, tools, prompt caching and images.
@@ -50,22 +52,22 @@ You have an OpenAI- or Anthropic-compatible gateway: LiteLLM, OpenRouter, a comp
 
 ## Download
 
-Get the latest build from [**Releases**](https://github.com/EK0720/model-switcher/releases).
+Get the latest build from [**Releases**](https://github.com/EK0720/gateswitch/releases).
 
 | OS | File |
 |---|---|
-| Windows 10/11 | `Model.Switcher_x.y.z_x64-setup.exe` or `.msi` |
-| macOS 11+ (Apple Silicon and Intel) | `Model.Switcher_x.y.z_universal.dmg` |
+| Windows 10/11 | `Gateswitch_x.y.z_x64-setup.exe` or `.msi` |
+| macOS 11+ (Apple Silicon and Intel) | `Gateswitch_x.y.z_universal.dmg` |
 | Linux | `.AppImage` or `.deb` |
 
 > [!IMPORTANT]
-> Windows is tested on real machines. **macOS and Linux builds have not been tested on real machines yet** (they are built by CI). If you try one, a [test report](https://github.com/EK0720/model-switcher/issues/new?template=test_report.yml) (works or not) helps a lot.
+> Windows is tested on real machines. **macOS and Linux builds have not been tested on real machines yet** (they are built by CI). If you try one, a [test report](https://github.com/EK0720/gateswitch/issues/new?template=test_report.yml) (works or not) helps a lot.
 
 > [!NOTE]
 > Builds are **not code-signed** yet, so the first launch shows a warning:
 > - **Windows** (SmartScreen "Windows protected your PC"): **More info → Run anyway**.
-> - **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
-> - **Linux** (AppImage): `chmod +x model-switcher*.AppImage`, then run it.
+> - **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Gateswitch.app"`.
+> - **Linux** (AppImage): `chmod +x gateswitch*.AppImage`, then run it.
 >
 > After that, updates install from inside the app (Windows, macOS, AppImage; `.deb` users download new versions by hand).
 >
@@ -128,14 +130,14 @@ Any gateway with an OpenAI-compatible `/v1/models` and `/v1/chat/completions` or
 <details>
 <summary><strong>How is this different from CC Switch?</strong></summary>
 
-[CC Switch](https://github.com/farion1231/cc-switch) is a great, broader tool: more CLIs, local routing, MCP and skills management. Model Switcher is narrower and focuses on changing configs safely: every write is undoable with encrypted backups, Restore defaults returns all apps to their original state, models are tested per gateway before you switch, Doctor fixes known gateway errors, and Orca is supported. Pick the one that fits.
+[CC Switch](https://github.com/farion1231/cc-switch) is a great, broader tool: more CLIs, local routing, MCP and skills management. Gateswitch is narrower and focuses on changing configs safely: every write is undoable with encrypted backups, Restore defaults returns all apps to their original state, models are tested per gateway before you switch, Doctor fixes known gateway errors, and Orca is supported. Pick the one that fits.
 
 </details>
 
 <details>
 <summary><strong>Something broke. How do I report it?</strong></summary>
 
-Settings → **Support report** creates a report with keys and user folders masked. Review it, then open a [bug report](https://github.com/EK0720/model-switcher/issues/new?template=bug_report.yml). Security problems: please report privately, see [SECURITY.md](SECURITY.md).
+Settings → **Support report** creates a report with keys and user folders masked. Review it, then open a [bug report](https://github.com/EK0720/gateswitch/issues/new?template=bug_report.yml). Security problems: please report privately, see [SECURITY.md](SECURITY.md).
 
 </details>
 

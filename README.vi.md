@@ -1,6 +1,8 @@
-# Model Switcher — Chuyển gateway, API key và model cho Codex, Claude Code, Claude Desktop & Orca (Windows · macOS · Linux)
+# Gateswitch — Chuyển gateway, API key và model cho Codex, Claude Code, Claude Desktop & Orca (Windows · macOS · Linux)
 
 [English](README.md) · **Tiếng Việt**
+
+<sub>Trước đây tên là <i>Model Switcher</i>.</sub>
 
 > Dự án độc lập, không liên kết với OpenAI hay Anthropic.
 
@@ -23,20 +25,20 @@
 Bản build **chưa ký số**, nên lần đầu mở hệ điều hành sẽ cảnh báo:
 
 - **Windows** (SmartScreen "Windows protected your PC"): bấm **More info → Run anyway**.
-- **macOS** ("không thể mở vì không xác minh được nhà phát triển"): chuột phải vào app → **Open**, hoặc chạy `xattr -dr com.apple.quarantine "/Applications/Model Switcher.app"`.
-- **Linux** (AppImage): `chmod +x model-switcher*.AppImage` rồi chạy.
+- **macOS** ("không thể mở vì không xác minh được nhà phát triển"): chuột phải vào app → **Open**, hoặc chạy `xattr -dr com.apple.quarantine "/Applications/Gateswitch.app"`.
+- **Linux** (AppImage): `chmod +x gateswitch*.AppImage` rồi chạy.
 
 Từ 0.2.1, app tự báo khi có bản mới và cập nhật bằng một click (Windows, macOS, AppImage; bản `.deb` tải tay). Gói cập nhật được ký và app kiểm tra chữ ký trước khi cài. App chỉ tải `latest.json` từ GitHub để kiểm tra; tắt ở Cài đặt → Cập nhật.
 
 Xem trang [Releases](../../releases). So mã SHA256 của file tải về với mã ghi trên trang Release trước khi chạy:
 
 ```powershell
-Get-FileHash .\Model.Switcher_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\Gateswitch_x64-setup.exe -Algorithm SHA256
 ```
 
 ```sh
-shasum -a 256 Model.Switcher*.dmg   # macOS
-sha256sum model-switcher*.AppImage  # Linux
+shasum -a 256 Gateswitch*.dmg   # macOS
+sha256sum gateswitch*.AppImage  # Linux
 ```
 
 ## Bắt đầu nhanh

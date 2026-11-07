@@ -2,6 +2,9 @@
 
 ## 0.2.1
 
+### Changed
+- Renamed to **Gateswitch** (was Model Switcher). Settings, keys, backups and history carry over: the app keeps the same identifier, keychain entries and data folder. The repository moved to `EK0720/gateswitch`; old links redirect.
+
 ### Added
 - In-app updates: a notice when a new version is out, then **Update and restart** in one click. Update packages are signed and checked against the public key built into the app before they install. The check fetches only `latest.json` from this repo's GitHub releases; turn it off in Settings → Updates. Works with the Windows installers, the macOS app and the Linux AppImage (not the `.deb`).
 

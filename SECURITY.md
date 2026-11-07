@@ -1,6 +1,6 @@
 # Security policy
 
-Model Switcher handles API keys, so security reports are taken seriously.
+Gateswitch handles API keys, so security reports are taken seriously.
 
 ## Reporting
 

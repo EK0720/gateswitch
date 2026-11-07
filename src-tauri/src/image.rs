@@ -65,7 +65,7 @@ pub fn status(home: &Path) -> Installed {
     Installed {
         path: path.display().to_string(),
         installed: block.is_some(),
-        outdated: block.map(|b| b.contains(OLD_PINNED)).unwrap_or(false),
+        outdated: block.map(|b| b.contains(OLD_PINNED) || b.contains("in Model Switcher")).unwrap_or(false),
         models: read_models(&std::fs::read_to_string(models_path(home)).unwrap_or_default()),
     }
 }
@@ -130,9 +130,9 @@ chosen this custom API workflow instead of the built-in image generation service
 
 The gateway is not fixed here: the helper below uses the provider Codex is currently
 configured with (`model_provider` in config.toml, its `base_url` and `env_key`) and the
-image model chosen for that gateway in Model Switcher (`model-switcher-images.json` next
+image model chosen for that gateway in Gateswitch (`model-switcher-images.json` next
 to config.toml). If it reports that no image model is set, tell the user to choose one in
-Model Switcher (Codex > Image generation); do not guess a model name.
+Gateswitch (Codex > Image generation); do not guess a model name.
 
 Transparent background default: default to PNG with a real transparent alpha channel for
 generated images, especially character art, costume variants, sprites, avatars, and separate
@@ -203,7 +203,7 @@ provider = config.get("model_providers", {}).get(config.get("model_provider", ""
 base_url = str(provider.get("base_url", "")).rstrip("/")
 env_key = str(provider.get("env_key", ""))
 if not base_url or not env_key:
-    raise SystemExit("Codex is not set up with a gateway provider; set one up in Model Switcher.")
+    raise SystemExit("Codex is not set up with a gateway provider; set one up in Gateswitch.")
 models = {}
 for folder in (home, Path.home() / ".codex"):
     try:
@@ -214,7 +214,7 @@ for folder in (home, Path.home() / ".codex"):
 model = models.get(base_url)
 if not model:
     raise SystemExit("No image model set for " + base_url
-                     + "; choose one in Model Switcher (Codex > Image generation).")
+                     + "; choose one in Gateswitch (Codex > Image generation).")
 key = None
 if sys.platform == "win32":
     import winreg
@@ -226,7 +226,7 @@ if sys.platform == "win32":
 if not key:
     key = os.environ.get(env_key, "")
 if not key:
-    raise SystemExit("Missing gateway key; configure it in Model Switcher.")
+    raise SystemExit("Missing gateway key; configure it in Gateswitch.")
 prompt_path, output_path = map(Path, sys.argv[1:3])
 transparent = (sys.argv[3:4] or ["transparent"])[0].lower() != "opaque"
 if output_path.exists():
@@ -239,7 +239,7 @@ request = urllib.request.Request(
     base_url + "/images/generations",
     data=json.dumps(payload).encode("utf-8"),
     headers={"Authorization": "Bearer " + key, "Content-Type": "application/json",
-             "Accept": "application/json", "User-Agent": "Model-Switcher-Image/1"})
+             "Accept": "application/json", "User-Agent": "Gateswitch-Image/1"})
 print("gateway: " + base_url + "  model: " + model)
 try:
     with urllib.request.urlopen(request, timeout=180) as response:
