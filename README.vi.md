@@ -28,7 +28,7 @@ Bản build **chưa ký số**, nên lần đầu mở hệ điều hành sẽ c
 - **macOS** ("không thể mở vì không xác minh được nhà phát triển"): chuột phải vào app → **Open**, hoặc chạy `xattr -dr com.apple.quarantine "/Applications/Gateswitch.app"`.
 - **Linux** (AppImage): `chmod +x gateswitch*.AppImage` rồi chạy.
 
-Từ 0.2.1, app tự báo khi có bản mới và cập nhật bằng một click (Windows, macOS, AppImage; bản `.deb` tải tay). Gói cập nhật được ký và app kiểm tra chữ ký trước khi cài. App chỉ tải `latest.json` từ GitHub để kiểm tra; tắt ở Cài đặt → Cập nhật.
+Từ 0.2.1, app tự báo khi có bản mới và cập nhật bằng một click (Windows, macOS, Linux; bản `.deb`/`.rpm` sẽ hỏi mật khẩu quản trị khi cài). Gói cập nhật được ký và app kiểm tra chữ ký trước khi cài. App chỉ tải `latest.json` từ GitHub để kiểm tra; tắt ở Cài đặt → Cập nhật.
 
 Xem trang [Releases](../../releases). So mã SHA256 của file tải về với mã ghi trên trang Release trước khi chạy:
 

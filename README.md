@@ -69,7 +69,7 @@ Get the latest build from [**Releases**](https://github.com/EK0720/gateswitch/re
 > - **macOS** ("cannot be opened because the developer cannot be verified"): right-click the app → **Open**, or run `xattr -dr com.apple.quarantine "/Applications/Gateswitch.app"`.
 > - **Linux** (AppImage): `chmod +x gateswitch*.AppImage`, then run it.
 >
-> After that, updates install from inside the app (Windows, macOS, AppImage; `.deb` users download new versions by hand).
+> After that, updates install from inside the app. On Linux, `.deb` and `.rpm` updates ask for your password (they install system-wide); the AppImage updates itself in place.
 >
 > Compare the file's SHA-256 with the one on the release page: `Get-FileHash <file> -Algorithm SHA256` (Windows), `shasum -a 256 <file>` (macOS), `sha256sum <file>` (Linux).
 
