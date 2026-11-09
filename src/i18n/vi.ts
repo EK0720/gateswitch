@@ -215,6 +215,7 @@ export const vi: Record<string, string> = {
   "Not installed": "Chưa cài",
   "Not on PATH or in the usual locations": "Không có trên PATH hay ở đường dẫn thường gặp",
   "Nothing to restore: the apps are already at default": "Không có gì để khôi phục: các app đã ở trạng thái mặc định",
+  "Old environment variable overriding the Claude Code model": "Biến môi trường cũ ghi đè model của Claude Code",
   "Old environment variable causing gateway 400 errors": "Biến môi trường cũ gây lỗi 400 ở gateway",
   "One step back to how the apps were before this tool, however many setups ran. This can be undone too.": "Một bước đưa app về như trước khi dùng tool, dù đã setup bao nhiêu lần. Thao tác này cũng hoàn tác được.",
   "Only gateway models in /model": "Chỉ hiện model gateway trong /model",

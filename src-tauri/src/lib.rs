@@ -338,19 +338,29 @@ async fn doctor_run() -> Result<Vec<doctor::Check>, String> {
 /// send fields the upstream rejects). Shown in Settings so the user can remove them.
 const STALE_ENV: &[&str] = &["CLAUDE_CODE_EFFORT_LEVEL"];
 
+/// Other variables Doctor may offer to remove, with the reason recorded for undo.
+/// ANTHROPIC_MODEL outranks settings.json, so a leftover one pins every new
+/// Claude Code session to the wrong model.
+const REMOVABLE_ENV: &[(&str, &str)] = &[("ANTHROPIC_MODEL", "Old environment variable overriding the Claude Code model")];
+
 #[tauri::command]
 fn stale_env() -> Vec<String> {
     STALE_ENV.iter().filter(|n| UserEnv.get(n).is_some()).map(|n| n.to_string()).collect()
 }
 
+fn removal_reason(name: &str) -> Option<&'static str> {
+    if STALE_ENV.contains(&name) {
+        return Some("Old environment variable causing gateway 400 errors");
+    }
+    REMOVABLE_ENV.iter().find(|(n, _)| *n == name).map(|(_, why)| *why)
+}
+
 #[tauri::command]
 fn clear_stale_env(name: String) -> Result<(), String> {
-    if !STALE_ENV.contains(&name.as_str()) {
-        return Err("This variable is not in the list allowed to be removed".into());
-    }
+    let why = removal_reason(&name).ok_or("This variable is not in the list allowed to be removed")?;
     // Recorded like a setup so it shows on the Restore page and can be undone.
     store()
-        .apply_with_env(&format!("Remove variable {name}"), "Old environment variable causing gateway 400 errors", &[], &[(name, None)], Some((&UserEnv, &Keychain)))
+        .apply_with_env(&format!("Remove variable {name}"), why, &[], &[(name, None)], Some((&UserEnv, &Keychain)))
         .map(|_| ())
 }
 
@@ -477,4 +487,20 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    /// Every "env:NAME" fix Doctor can offer must be accepted by clear_stale_env,
+    /// or the Fix button only shows "not in the list allowed to be removed".
+    #[test]
+    fn doctor_env_fixes_are_removable() {
+        let src = include_str!("doctor.rs");
+        let names: Vec<&str> = src.split("\"env:").skip(1).filter_map(|s| s.split('"').next()).filter(|n| !n.is_empty() && !n.contains('<')).collect();
+        assert!(names.contains(&"ANTHROPIC_MODEL"));
+        for n in names {
+            assert!(super::removal_reason(n).is_some(), "{n} is offered by Doctor but cannot be removed");
+        }
+        assert!(super::removal_reason("PATH").is_none());
+    }
 }

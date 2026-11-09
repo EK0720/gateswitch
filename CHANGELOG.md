@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4
+
+### Fixed
+- Doctor's **Fix** for `ANTHROPIC_MODEL` failed with "not in the list allowed to be removed". It now removes the variable (can be undone on the Restore page). A test makes sure every variable Doctor offers to fix can be removed.
+
 ## 0.2.3
 
 ### Added
