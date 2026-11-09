@@ -45,6 +45,17 @@ pub fn run() -> Vec<Check> {
     for w in cur.warnings {
         out.push(Check { level: "bad", app: "Claude Code".into(), title: "Configuration problem".into(), detail: w, fix: Some("page:claude-code".into()) });
     }
+    // Claude Code ranks the ANTHROPIC_MODEL environment variable above the
+    // `model` in settings.json, so a leftover one silently picks the model.
+    if let Some(v) = crate::secrets::UserEnv.get("ANTHROPIC_MODEL").filter(|v| !v.is_empty()) {
+        out.push(Check {
+            level: "bad",
+            app: "Claude Code".into(),
+            title: "ANTHROPIC_MODEL is set as an environment variable".into(),
+            detail: format!("Every new session starts on {v} instead of the model set here, because the environment variable wins over settings.json. Click Fix to remove it (can be undone)."),
+            fix: Some("env:ANTHROPIC_MODEL".into()),
+        });
+    }
     if crate::secrets::UserEnv.get("CLAUDE_CODE_EFFORT_LEVEL").is_some() {
         out.push(Check {
             level: "bad",

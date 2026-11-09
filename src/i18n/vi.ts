@@ -49,6 +49,7 @@ export const vi: Record<string, string> = {
   "Claude Desktop not found. You can still set it up; the app uses this configuration once installed.": "Chưa thấy Claude Desktop trên máy. Vẫn setup được, app dùng cấu hình này khi được cài.",
   "Claude Desktop's configLibrary not found": "Không tìm thấy configLibrary của Claude Desktop",
   "Claude's settings.json must be a JSON object": "settings.json của Claude phải là một JSON object",
+  "ANTHROPIC_MODEL is set as an environment variable": "ANTHROPIC_MODEL đang đặt trong biến môi trường",
   "CLAUDE_CODE_EFFORT_LEVEL is still set as an environment variable": "CLAUDE_CODE_EFFORT_LEVEL còn trong biến môi trường",
   "Clear selection": "Bỏ chọn",
   "Click Fetch models to get the list from the gateway.": "Bấm Tải model để lấy danh sách từ gateway.",

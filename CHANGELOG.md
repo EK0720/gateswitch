@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+### Added
+- Doctor flags a leftover `ANTHROPIC_MODEL` environment variable. Claude Code ranks it above the model in `settings.json`, so every new session opened on that model instead of the one set in Gateswitch. **Fix** removes it (can be undone).
+
 ## 0.2.2
 
 ### Changed

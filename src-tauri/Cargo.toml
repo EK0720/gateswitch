@@ -1,6 +1,6 @@
 [package]
 name = "gateswitch"
-version = "0.2.2"
+version = "0.2.3"
 description = "Switch gateway, API key and model for Codex, Claude Code, Claude Desktop and Orca"
 authors = ["EK0720"]
 edition = "2024"

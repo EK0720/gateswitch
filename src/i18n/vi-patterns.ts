@@ -1,5 +1,6 @@
 // English -> Vietnamese for backend messages that carry values.
 export const viPatterns: [RegExp, string][] = [
+  [new RegExp("^Every new session starts on (.+) instead of the model set here, because the environment variable wins over settings\.json\. Click Fix to remove it \(can be undone\)\.$", "s"), "Mỗi phiên mới đều mở bằng $1 thay vì model đặt ở đây, vì biến môi trường được ưu tiên hơn settings.json. Bấm Sửa để xóa (hoàn tác được)."],
   [new RegExp("^Removed (\\d+) configuration\\(s\\)\\. Quit and reopen Claude Desktop\\.$", "s"), "Đã xóa $1 cấu hình. Thoát hẳn rồi mở lại Claude Desktop."],
   [new RegExp("^No response after (\\d+) seconds$", "s"), "Không phản hồi sau $1 giây"],
   [new RegExp("^Key rejected \\(HTTP (\\d+)\\)\\. Check the key\\.$", "s"), "Key bị từ chối (HTTP $1). Kiểm tra lại key."],
