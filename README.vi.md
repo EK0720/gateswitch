@@ -15,7 +15,7 @@
 - **Preset gateway**: nhập file `.json` do gateway phát hành hoặc preset mẫu (9router, LiteLLM, OpenRouter), chỉ cần dán key.
 - **Kiểm tra khả năng**: gửi request thật để biết gateway có hỗ trợ streaming, tool, prompt caching, ảnh hay không.
 - **Doctor**: tìm cấu hình hỏng, biến môi trường cũ gây lỗi 400, proxy, policy quản lý; có nút sửa nhanh.
-- **Sử dụng**: thống kê token và tỉ lệ cache từ log trên máy, ước tính chi phí theo giá bạn nhập.
+- **Sử dụng**: thống kê token và tỉ lệ cache từ log trên máy (chỉ đọc khi cần), ước tính chi phí theo giá bạn nhập. Tùy chọn biểu tượng khay, cửa sổ nhỏ và thông báo khối 5 giờ, đều tắt mặc định.
 - **Hoàn tác và Khôi phục mặc định**: mỗi thay đổi đều hoàn tác được; một bước đưa các app về như trước khi dùng tool.
 
 ## Tải về

@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- Codex 0.157+ refused the gateway model catalog with "missing field `supported_reasoning_levels`", so Codex and Orca would not start. The catalog now always includes the field. Press **Set up** on the Codex page once to write a fixed catalog.
+- Usage: Claude Code numbers were wrong. Claude's `input_tokens` excludes cached tokens while Codex's includes them, and cache writes were ignored, so cache hit could show tens of thousands of percent, "tokens in" was far too low and estimated cost could go negative. Every app now counts four separate kinds (input, cache read, cache write, output); cache hit is cache read ÷ all input.
+- Usage: days follow the computer's time zone instead of UTC, so late-night work no longer lands on the previous day.
+- Usage: no longer stops after 4000 session files per app.
+- Usage: totals in the "By app" and "By model" rows sit on the right again.
+
+### Added
+- Codex: **Effort levels in /model** (Codex page, Advanced). When on, the catalog lists low/medium/high/xhigh, Codex shows its effort picker and sends `reasoning.effort`. Without it, 9router runs `cx/` models at its default "low" effort. Off by default, because gateways that forward to a plain chat API reject the field. The capability test now also sends one request with `reasoning.effort` and remembers the answer per provider: accepted turns the switch on, a 400 turns it off.
+- Usage: a cache-write price per model (empty means 1.25 × input, as Anthropic bills it).
+- Settings: a **Notifications & background** section. The tray icon, the always-on-top mini window, the 80% / 100% block alerts and the block limit moved here from the Usage page's settings menu, which keeps Auto refresh and links to it. Everything in the section is off by default.
+- **Notify when it's back**: the out-of-quota card on the Codex and Claude Code pages can watch the model and send a notification once it works again. A watch covers the whole quota group (every `cx/` model shares one account). When the gateway says when the limit resets, Gateswitch checks once, just after that time, counted from when the error was seen. Otherwise it backs off from 5 to 30 minutes and gives up after 24 hours. A refused check costs nothing, and the one that works asks for at most 16 tokens. Watches survive a restart and are listed in Settings, where you can cancel them. Out-of-credit errors (balance, billing, HTTP 402) are never watched, because waiting doesn't top up an account.
+- Optional **Watch automatically** (off by default): after **Test models**, a watch starts by itself when the quota group of the model Codex or Claude Code is set to is out of quota.
+- Optional **Closing the window hides it to the tray** (needs the tray icon). Gateswitch keeps running, so alerts and quota watches still arrive. Open it again or quit from the tray menu.
+
 ## 0.2.4
 
 ### Fixed

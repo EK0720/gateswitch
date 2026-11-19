@@ -31,7 +31,7 @@ You have an OpenAI- or Anthropic-compatible gateway: LiteLLM, OpenRouter, a comp
 - **Undo anything**: every change is one undoable step. **Restore defaults** puts every app back the way it was before the tool.
 - **Your keys stay yours**: stored in the OS keychain, masked in logs, errors, reports and presets. No telemetry, no account.
 - **Fixes the classic errors**: Doctor finds stale variables behind HTTP 400 `reasoning_effort`, broken config files, proxies and managed policies, with one-click fixes.
-- **Usage without uploads**: tokens, cache hit rate and cost estimates, read from logs already on your machine.
+- **Usage without uploads**: tokens, cache hit rate and cost estimates, read on demand from logs already on your machine. Optional tray icon, mini window and 5-hour block alerts, all off by default.
 - **Codex image generation** through your gateway, transparent PNG by default.
 - **One-click updates**, signed and verified before install.
 - **Cross-platform**, English and Vietnamese, light and dark theme, Ctrl+K command palette.

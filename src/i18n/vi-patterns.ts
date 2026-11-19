@@ -1,5 +1,13 @@
 // English -> Vietnamese for backend messages that carry values.
 export const viPatterns: [RegExp, string][] = [
+  // Usage insights (usage_analytics). The backend must emit these exact English templates.
+  [/^(\d+) cache rewrites after idle gaps$/s, "$1 lần ghi lại cache sau khi nghỉ"],
+  [/^A pause longer than 5 minutes lets the prompt cache expire, so the next turn writes the whole context again\. These rewrites cost (.+) tokens\.$/s, "Nghỉ quá 5 phút làm prompt cache hết hạn, lượt kế tiếp phải ghi lại toàn bộ context. Các lần ghi lại này tốn $1 token."],
+  [/^One session reached (.+) tokens of context$/s, "Một phiên có context lên tới $1 token"],
+  [/^Subagents used (\d+)% of tokens$/s, "Subagent dùng $1% số token"],
+  [/^Most of it went to (.+)\.$/s, "Phần lớn là $1."],
+  [/^Busiest hour: (\d\d):00$/s, "Giờ bận nhất: $1:00"],
+  [/^(\d+)% of tokens were spent between (\d\d):00 and (\d\d):00\.$/s, "$1% số token được dùng trong khoảng $2:00–$3:00."],
   [new RegExp("^Every new session starts on (.+) instead of the model set here, because the environment variable wins over settings\.json\. Click Fix to remove it \(can be undone\)\.$", "s"), "Mỗi phiên mới đều mở bằng $1 thay vì model đặt ở đây, vì biến môi trường được ưu tiên hơn settings.json. Bấm Sửa để xóa (hoàn tác được)."],
   [new RegExp("^Removed (\\d+) configuration\\(s\\)\\. Quit and reopen Claude Desktop\\.$", "s"), "Đã xóa $1 cấu hình. Thoát hẳn rồi mở lại Claude Desktop."],
   [new RegExp("^No response after (\\d+) seconds$", "s"), "Không phản hồi sau $1 giây"],

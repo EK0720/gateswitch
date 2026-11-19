@@ -10,6 +10,7 @@ export const capCols = (): [keyof Caps, string, string][] => [
   ["tools", "Tool", t("Can call tools/functions")],
   ["caching", "Cache", t("Second call reports cached tokens")],
   ["images", t("Images"), t("Accepts image input")],
+  ["reasoning", "Effort", t("Accepts reasoning.effort (lets Codex choose low/medium/high)")],
 ];
 
 function title(label: string, hint: string, c: CapCheck) {
