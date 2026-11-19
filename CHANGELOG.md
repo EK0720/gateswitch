@@ -17,6 +17,19 @@
 - Optional **Watch automatically** (off by default): after **Test models**, a watch starts by itself when the quota group of the model Codex or Claude Code is set to is out of quota.
 - Optional **Closing the window hides it to the tray** (needs the tray icon). Gateswitch keeps running, so alerts and quota watches still arrive. Open it again or quit from the tray menu.
 
+## 0.3.0
+
+### Fixed
+- Codex 0.157+: the model catalog always includes `supported_reasoning_levels`. Without it Codex refused to load the catalog ("missing field `supported_reasoning_levels`"), so Codex and Orca would not start. **Set up Codex again once** to rewrite the catalog.
+- Usage token accounting: four separate kinds (input, cache read, cache write, output). Claude input excludes cache, Codex input includes it. Forked Codex/Orca sessions no longer re-count the parent's total.
+
+### Added
+- **Effort levels in /model** (Codex, per provider, off by default): the catalog lists low…xhigh so Codex shows its effort picker and sends `reasoning.effort`. The capability test probes it and turns the setting on or off from the gateway's answer. Default effort gains xhigh.
+- **New Usage page:** range, app, project and model filters; stacked chart (tokens or cost, by app or model, drill into hours); project, model and session tables with estimated cost; session details; analysis and insights; 5-hour blocks; CSV/JSON export; per-model prices. Days use local time, logs are read incrementally with an on-disk cache, and the page updates live.
+- **Notifications & background** (Settings, all off by default): tray icon with today's tokens, an always-on-top mini window, alerts at 80% and 100% of a 5-hour block limit, and hide to tray on close.
+- **Quota watch:** "Notify when it's back" on out-of-quota results, plus an optional auto-watch for the groups Codex and Claude Code use. It checks once at the reset time the gateway announces (otherwise 5/10/20/30 min back-off), gives up after 24 h, and never runs for out-of-credit errors.
+- Only one copy of the app runs; opening it again shows the existing window.
+
 ## 0.2.4
 
 ### Fixed
