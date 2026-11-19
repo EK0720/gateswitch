@@ -207,7 +207,7 @@ footer a:hover{color:var(--ink)}
   <header class="hero">
     <div class="glow" aria-hidden="true"></div>
     <div class="wrap">
-      <a class="pill" href="https://github.com/EK0720/gateswitch/releases/latest" rel="noopener"><b data-i="hero.new">New</b><span data-i="hero.pill">One-click updates, signed and verified</span> →</a>
+      <a class="pill" href="https://github.com/EK0720/gateswitch/releases/latest" rel="noopener"><b data-i="hero.new">New</b><span data-i="hero.pill">0.3: usage dashboard, tray and quota alerts</span> →</a>
       <h1><span data-i="hero.t1">Any AI gateway.</span><br><span class="grad" data-i="hero.t2">Every coding app.</span></h1>
       <p class="sub" data-i="hero.sub">Point Codex, Claude Code, Claude Desktop and Orca at your LiteLLM, OpenRouter or company gateway in one click. Test models first, and undo anything.</p>
       <div class="cta">
@@ -277,8 +277,23 @@ footer a:hover{color:var(--ink)}
         <div class="card media span3 reveal">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></svg></div>
           <h3 data-i="f.usage.h">Usage without uploads</h3>
-          <p data-i="f.usage.p">Tokens, cache hit rate and cost estimates, read from logs already on your machine.</p>
+          <p data-i="f.usage.p">Tokens, cache hits and estimated cost by app, project, model and session, with 5-hour blocks and export. Read from logs already on your machine, updated live.</p>
           <img src="assets/usage.png" width="2400" height="1520" loading="lazy" alt="Usage page" data-i-alt="alt.usage">
+        </div>
+        <div class="card span2 reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></div>
+          <h3 data-i="f.quota.h">Know when quota is back</h3>
+          <p data-i="f.quota.p">Out of quota? Gateswitch checks again at the reset time the gateway announces and tells you when the model works again.</p>
+        </div>
+        <div class="card span2 reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
+          <h3 data-i="f.tray.h">Tray and mini window</h3>
+          <p data-i="f.tray.p">Today's tokens in the system tray, an always-on-top mini window, and alerts at 80% and 100% of a 5-hour block. All off until you turn them on.</p>
+        </div>
+        <div class="card span2 reveal">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div>
+          <h3 data-i="f.effort.h">Effort levels for Codex</h3>
+          <p data-i="f.effort.p">Turn on low to xhigh in Codex's /model menu for gateways that accept reasoning effort. The capability test tells you if yours does.</p>
         </div>
       </div>
     </div>
@@ -354,7 +369,7 @@ footer a:hover{color:var(--ink)}
 (() => {
   const VI = {
     "nav.features":"Tính năng","nav.how":"Cách dùng","nav.faq":"Hỏi đáp","nav.download":"Tải về",
-    "hero.new":"Mới","hero.pill":"Cập nhật một click, có ký và kiểm tra",
+    "hero.new":"Mới","hero.pill":"0.3: bảng thống kê, khay hệ thống và báo hồi quota",
     "hero.t1":"Gateway AI nào cũng được.","hero.t2":"Mọi app lập trình.",
     "hero.sub":"Trỏ Codex, Claude Code, Claude Desktop và Orca sang LiteLLM, OpenRouter hay gateway công ty chỉ với một click. Test model trước, và hoàn tác được mọi thứ.",
     "hero.dl":"Tải về","hero.src":"Xem mã nguồn","hero.other":"Hệ điều hành khác",
@@ -367,8 +382,11 @@ footer a:hover{color:var(--ink)}
     "f.keys.h":"Key của bạn vẫn là của bạn","f.keys.p":"Lưu trong keychain của hệ điều hành, được che trong log, lỗi và báo cáo. Không tài khoản, không thu thập dữ liệu.",
     "f.doc.h":"Doctor sửa các lỗi kinh điển","f.doc.p":"HTTP 400 <code>reasoning_effort</code>, biến môi trường cũ, config hỏng, proxy và policy quản lý, sửa bằng một click.",
     "f.upd.h":"Cập nhật một click","f.upd.p":"App báo khi có bản mới. Gói cập nhật được ký và kiểm tra trước khi cài.",
+    "f.quota.h":"Biết khi nào quota hồi","f.quota.p":"Hết quota? Gateswitch kiểm tra lại đúng giờ gateway báo reset và báo bạn khi model chạy lại được.",
+    "f.tray.h":"Khay hệ thống và cửa sổ nhỏ","f.tray.p":"Số token hôm nay trên khay hệ thống, cửa sổ nhỏ luôn nổi, và cảnh báo khi khối 5 giờ đạt 80% và 100%. Tất cả đều tắt cho tới khi bạn bật.",
+    "f.effort.h":"Mức effort cho Codex","f.effort.p":"Bật low đến xhigh trong menu /model của Codex với gateway nhận reasoning effort. Bài kiểm tra khả năng cho biết gateway của bạn có nhận không.",
     "f.codex.h":"Codex, setup đúng cách","f.codex.p":"Model của gateway trong menu /model, tên provider trung tính, và tạo ảnh qua gateway của bạn.",
-    "f.usage.h":"Thống kê mà không cần tải lên","f.usage.p":"Token, tỉ lệ cache và ước tính chi phí, đọc từ log có sẵn trên máy bạn.",
+    "f.usage.h":"Thống kê mà không cần tải lên","f.usage.p":"Token, tỉ lệ cache và chi phí ước tính theo app, project, model và phiên, kèm khối 5 giờ và xuất file. Đọc từ log có sẵn trên máy bạn, cập nhật trực tiếp.",
     "h.eyebrow":"Cách dùng","h.h2":"Chạy được trong một phút",
     "h.1.h":"Thêm gateway","h.1.p":"Base URL và API key, hoặc nhập preset. Key được cất thẳng vào keychain của hệ điều hành.",
     "h.2.h":"Test model","h.2.p":"Tải danh sách model và xem model nào thật sự chạy trước khi dùng.",
