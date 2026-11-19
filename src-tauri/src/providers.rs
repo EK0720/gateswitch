@@ -34,6 +34,10 @@ pub struct Provider {
     /// Extra HTTP headers the gateway asks for (see headers.rs). Not secrets.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub headers: BTreeMap<String, String>,
+    /// Whether Codex's catalog should list effort levels (so Codex sends
+    /// reasoning.effort). None = not tested yet, treated as off.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effort_levels: Option<bool>,
     #[serde(default, skip_deserializing)]
     pub has_key: bool,
 }
@@ -133,6 +137,7 @@ impl Providers {
                     p.models.clear();
                     p.info.clear();
                     p.probes.clear();
+                    p.effort_levels = None;
                     p.latency_ms = None;
                 }
                 p.name = name.into();
@@ -140,7 +145,7 @@ impl Providers {
                 p.clone()
             }
             None => {
-                let p = Provider { id: id.clone(), name: name.into(), base_url, models: vec![], latency_ms: None, checked_at: None, info: BTreeMap::new(), probes: BTreeMap::new(), codex_name: None, codex_env: None, headers: BTreeMap::new(), has_key: false };
+                let p = Provider { id: id.clone(), name: name.into(), base_url, models: vec![], latency_ms: None, checked_at: None, info: BTreeMap::new(), probes: BTreeMap::new(), codex_name: None, codex_env: None, headers: BTreeMap::new(), effort_levels: None, has_key: false };
                 items.push(p.clone());
                 p
             }
@@ -192,6 +197,16 @@ impl Providers {
         let out = p.clone();
         self.save(&items)?;
         Ok(out)
+    }
+
+    /// Remember whether this gateway accepts reasoning.effort from Codex.
+    pub fn set_effort_levels(&self, id: &str, on: Option<bool>, vault: &dyn Vault) -> Result<Provider, String> {
+        let mut items = self.list(vault);
+        let p = items.iter_mut().find(|p| p.id == id).ok_or("Provider not found")?;
+        p.effort_levels = on;
+        let out = p.clone();
+        self.save(&items)?;
+        Ok(Provider { has_key: vault.get(&account(id)).is_some(), ..out })
     }
 
     /// Merge probe results (keeps older results for models not in this run).

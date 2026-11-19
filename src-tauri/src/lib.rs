@@ -15,9 +15,13 @@ mod rlog;
 mod seal;
 mod probe;
 mod providers;
+mod quota_watch;
 mod secrets;
 mod store;
 mod usage;
+mod usage_live;
+mod usage_prefs;
+mod usage_report;
 
 use secrets::{Env, Keychain, UserEnv, Vault};
 use serde::Serialize;
@@ -91,7 +95,7 @@ async fn refresh_models(id: String) -> Result<providers::Provider, String> {
 /// "Kiểm tra model": one tiny request per model, only when the user clicks.
 /// `models` = None probes every model the provider lists.
 #[tauri::command]
-async fn probe_models(id: String, models: Option<Vec<String>>) -> Result<providers::Provider, String> {
+async fn probe_models(app: tauri::AppHandle, id: String, models: Option<Vec<String>>) -> Result<providers::Provider, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let ps = providers();
         let p = ps.get(&id, &Keychain)?;
@@ -101,10 +105,62 @@ async fn probe_models(id: String, models: Option<Vec<String>>) -> Result<provide
             return Err("No models to test. Click Load models first.".into());
         }
         let results = probe::probe_all(&p.base_url, &key, list);
-        ps.set_probes(&id, results, &Keychain)
+        let saved = ps.set_probes(&id, results.clone(), &Keychain)?;
+        let auto = usage_prefs::settings_get_in(&data_dir()).quota_auto;
+        let tools = if auto { tool_models() } else { vec![] };
+        quota_watch::after_probe(&app, &saved, &results, auto, &tools);
+        Ok(saved)
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+/// (provider id, model) that Codex and Claude Code are set to, when they point
+/// at a saved provider. Claude Code is matched by its base URL.
+fn tool_models() -> Vec<(String, String)> {
+    let mut out = vec![];
+    let cx = codex_current();
+    if !cx.provider_id.is_empty() {
+        out.push((cx.provider_id, cx.model));
+    }
+    let cc = claude_current();
+    if !cc.base_url.is_empty() {
+        let root = claude::base_root(&cc.base_url);
+        if let Some(p) = providers().list(&Keychain).into_iter().find(|p| claude::base_root(&p.base_url) == root) {
+            out.push((p.id, cc.model));
+        }
+    }
+    out
+}
+
+// ---------------------------------------------------------------- quota watch
+
+#[tauri::command]
+fn quota_watch_list(qw: tauri::State<'_, quota_watch::QuotaWatch>) -> Vec<quota_watch::Watch> {
+    qw.list()
+}
+
+/// "Notify when it's back" on an out-of-quota card. Clicking is consent, so
+/// this works whether or not automatic watching is on.
+#[tauri::command]
+fn quota_watch_add(app: tauri::AppHandle, provider_id: String, model: String) -> Result<Vec<quota_watch::Watch>, String> {
+    let p = providers().get(&provider_id, &Keychain)?;
+    let group = quota_watch::group_in(&p.info, &model);
+    let check = quota_watch::check_model(&p.models, &model);
+    let w = quota_watch::arm(&p.id, &group, &check, p.probes.get(&model), "manual", chrono::Utc::now())?;
+    Ok(app.state::<quota_watch::QuotaWatch>().edit(&app, |l| {
+        quota_watch::upsert(l, w);
+        true
+    }))
+}
+
+#[tauri::command]
+fn quota_watch_remove(app: tauri::AppHandle, provider_id: String, group: String) -> Vec<quota_watch::Watch> {
+    app.state::<quota_watch::QuotaWatch>().edit(&app, |l| {
+        let n = l.len();
+        l.retain(|w| !(w.provider_id == provider_id && w.group == group));
+        l.len() != n
+    })
 }
 
 /// Quit Claude Desktop and start it again. Only processes whose executable is
@@ -209,7 +265,7 @@ fn codex_setup(req: codex::Request) -> Result<SetupResult, String> {
     let mut writes = Vec::new();
     let catalog = if req.catalog {
         let models = if p.models.is_empty() { vec![req.model.clone()] } else { p.models.clone() };
-        let (cpath, bytes) = codex::build_catalog(&models, &req.model, req.images, &data)?;
+        let (cpath, bytes) = codex::build_catalog(&models, &req.model, req.images, req.levels, &data)?;
         if !cpath.exists() {
             writes.push((cpath.clone(), bytes));
         }
@@ -237,6 +293,10 @@ fn codex_setup(req: codex::Request) -> Result<SetupResult, String> {
         detail.push_str(&format!(" · {} model trong /model", p.models.len().max(1)));
     }
     let change = store().apply_with_env("Setup Codex", &detail, &writes, &env_sets, Some((&UserEnv, &Keychain)))?;
+    // The user's switch is the latest word on this gateway; keep it for next time.
+    if req.catalog && p.effort_levels != Some(req.levels) {
+        let _ = ps.set_effort_levels(&p.id, Some(req.levels), &Keychain);
+    }
     Ok(SetupResult { change, message: "Codex is set up".into() })
 }
 
@@ -322,10 +382,98 @@ fn claude_setup(req: claude::Request) -> Result<SetupResult, String> {
     Ok(SetupResult { change, message: "Claude Code is set up".into() })
 }
 
-/// Token usage read from the apps' own logs. Only runs when the page opens.
+// ------------------------------------------------------------------ usage
+// Token usage read from the apps' own logs: only on demand (Usage page, and the
+// optional tray, mini window and alerts, all off by default).
+
+/// Run `f` on the usage index off the async runtime. The index is re-scanned
+/// incrementally when it is stale or `refresh` is set.
+async fn with_usage<T: Send + 'static>(
+    state: tauri::State<'_, usage::UsageState>,
+    refresh: bool,
+    f: impl FnOnce(&usage::Index) -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    let st = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut s = usage::lock(&st);
+        f(s.index(refresh))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
-async fn usage_stats() -> Result<usage::Usage, String> {
-    tauri::async_runtime::spawn_blocking(usage::collect).await.map_err(|e| e.to_string())
+async fn usage_query(state: tauri::State<'_, usage::UsageState>, filter: usage_report::UsageFilter, refresh: Option<bool>) -> Result<usage_report::UsageReport, String> {
+    with_usage(state, refresh.unwrap_or(false), move |i| usage_report::query(i, &filter, &chrono::Local, chrono::Utc::now())).await
+}
+
+#[tauri::command]
+async fn usage_session(state: tauri::State<'_, usage::UsageState>, key: String) -> Result<usage_report::SessionDetail, String> {
+    with_usage(state, false, move |i| usage_report::session(i, &key)).await
+}
+
+#[tauri::command]
+async fn usage_blocks(state: tauri::State<'_, usage::UsageState>, filter: usage_report::UsageFilter) -> Result<usage_report::BlocksReport, String> {
+    with_usage(state, false, move |i| usage_report::blocks(i, &filter, &chrono::Local, chrono::Utc::now())).await
+}
+
+#[tauri::command]
+async fn usage_analytics(state: tauri::State<'_, usage::UsageState>, filter: usage_report::UsageFilter) -> Result<usage_report::UsageAnalytics, String> {
+    with_usage(state, false, move |i| usage_report::analytics(i, &filter, &chrono::Local, chrono::Utc::now())).await
+}
+
+/// Writes the export into Downloads and returns the file path.
+#[tauri::command]
+async fn usage_export(state: tauri::State<'_, usage::UsageState>, filter: usage_report::UsageFilter, format: String) -> Result<String, String> {
+    with_usage(state, false, move |i| {
+        let ext = if format == "json" { "json" } else if format == "csv" { "csv" } else { return Err("Unknown export format".into()) };
+        let text = usage_report::export_text(i, &filter, &chrono::Local, chrono::Utc::now(), ext)?;
+        let date = chrono::Local::now().format("%Y-%m-%d").to_string();
+        usage_prefs::write_export(&usage_prefs::export_dir(), &date, ext, &text).map(|p| p.display().to_string())
+    })
+    .await
+}
+
+#[tauri::command]
+fn usage_prices_get() -> std::collections::BTreeMap<String, usage_prefs::UsagePrice> {
+    usage_prefs::prices_get_in(&data_dir())
+}
+
+#[tauri::command]
+fn usage_prices_set(prices: std::collections::BTreeMap<String, usage_prefs::UsagePrice>) -> Result<(), String> {
+    usage_prefs::prices_set_in(&data_dir(), &prices)
+}
+
+#[tauri::command]
+fn usage_settings_get() -> usage_prefs::UsageSettings {
+    usage_prefs::settings_get_in(&data_dir())
+}
+
+/// Saves and applies right away (tray, mini window, alerts). Async: creating
+/// the mini window from a sync command deadlocks on Windows.
+#[tauri::command]
+async fn usage_settings_set(app: tauri::AppHandle, settings: usage_prefs::UsageSettings) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || usage_live::save_and_apply(&app, &settings)).await.map_err(|e| e.to_string())?
+}
+
+/// Watch the log folders while the Usage page or the mini window is visible;
+/// emits "usage-changed". Each window holds the watcher separately.
+#[tauri::command]
+async fn usage_watch(app: tauri::AppHandle, window: tauri::Window, state: tauri::State<'_, usage::UsageState>, on: bool) -> Result<(), String> {
+    let st = state.inner().clone();
+    let user = window.label().to_string();
+    tauri::async_runtime::spawn_blocking(move || {
+        let watch = app.state::<usage_prefs::Watch>().inner().clone();
+        usage_prefs::set_watch(app, st, watch, &user, on)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// Mini window: double-click brings the main window back.
+#[tauri::command]
+async fn usage_open_main(app: tauri::AppHandle) {
+    usage_live::open_main(&app);
 }
 
 /// One-click health check of what is configured on this machine.
@@ -425,7 +573,8 @@ fn preset_export(id: String) -> Result<String, String> {
     Ok(preset::export(&p))
 }
 
-/// Capability test (streaming, tools, responses/messages, caching, images)
+/// Capability test (streaming, tools, responses/messages, caching, images,
+/// reasoning effort)
 /// for a few models. Costs a few hundred tokens per model; the UI asks first.
 #[tauri::command]
 async fn capability_test(id: String, models: Vec<String>) -> Result<Vec<(String, probe::Caps)>, String> {
@@ -435,7 +584,12 @@ async fn capability_test(id: String, models: Vec<String>) -> Result<Vec<(String,
         if models.is_empty() || models.len() > 8 {
             return Err("Choose 1 to 8 models".into());
         }
-        Ok(probe::capabilities(&p.base_url, &key, models))
+        let results = probe::capabilities(&p.base_url, &key, models);
+        // Remember whether Codex may send reasoning.effort to this gateway.
+        if let Some(ok) = probe::effort_verdict_of(&results) {
+            providers().set_effort_levels(&id, Some(ok), &Keychain)?;
+        }
+        Ok(results)
     })
     .await
     .map_err(|e| e.to_string())?
@@ -463,9 +617,24 @@ fn apply_effects(window: &tauri::WebviewWindow) -> bool {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // Must be first: a second launch (e.g. from the Start menu while the
+        // window is hidden in the tray) just brings the running one back, so
+        // there is never a second tray icon or quota scheduler.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(w) = app.get_webview_window("main") {
+                let _ = w.show();
+                let _ = w.unminimize();
+                let _ = w.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_notification::init())
+        .manage(usage::new_state())
+        .manage(usage_prefs::Watch::default())
+        .manage(usage_live::Live::default())
+        .manage(quota_watch::QuotaWatch::default())
         .setup(|app| {
             // Backups from builds before encryption: seal them in the background.
             std::thread::spawn(|| store().seal_old_backups());
@@ -473,17 +642,28 @@ pub fn run() {
                 let glass = apply_effects(&window);
                 let _ = window.eval(&format!("document.documentElement.dataset.glass='{glass}'"));
             }
+            // Tray, mini window and alerts are all off unless the user turned them on.
+            let s = usage_prefs::settings_get_in(&data_dir());
+            if s.tray || s.overlay || s.notify {
+                usage_live::apply(app.handle(), &s);
+            }
+            // Saved quota watches resume; no thread at all when there are none.
+            app.state::<quota_watch::QuotaWatch>().start(app.handle());
             Ok(())
         })
+        .on_window_event(usage_live::on_window_event)
         .invoke_handler(tauri::generate_handler![
             scan, history, undo,
             list_providers, save_provider, remove_provider, set_provider_headers, refresh_models, probe_models,
             codex_current, codex_setup, claude_current, claude_setup,
             claude_desktop_current, claude_desktop_setup, claude_desktop_restart,
             orca_status, orca_sync, orca_restart, claude_desktop_remove, codex_names, set_codex_names, codex_desktop_restart,
-            support_report, usage_stats, doctor_run, stale_env, clear_stale_env,
+            support_report, doctor_run, stale_env, clear_stale_env,
             reset_preview, reset_apply, preset_samples, preset_parse, preset_import, preset_export,
-            capability_test, codex_image_status, codex_image_setup, codex_image_remove
+            capability_test, codex_image_status, codex_image_setup, codex_image_remove,
+            usage_query, usage_session, usage_blocks, usage_analytics, usage_export,
+            usage_prices_get, usage_prices_set, usage_settings_get, usage_settings_set, usage_watch, usage_open_main,
+            quota_watch_list, quota_watch_add, quota_watch_remove
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

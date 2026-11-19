@@ -154,7 +154,7 @@ fn post(agent: &ureq::Agent, url: &str, key: &str, body: serde_json::Value) -> R
     }
 }
 
-fn agent() -> ureq::Agent {
+pub(crate) fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
         .timeout_global(Some(Duration::from_secs(TIMEOUT_SECS)))
         .http_status_as_error(false)
@@ -215,6 +215,15 @@ pub struct Caps {
     /// Second identical request reports cached tokens (> 0).
     pub caching: Option<Check>,
     pub images: Option<Check>,
+    /// /responses only: accepts `reasoning.effort` (what Codex sends when its
+    /// catalog lists effort levels).
+    #[serde(default)]
+    pub reasoning: Option<Check>,
+    /// Verdict for the provider setting: Some(false) only when the gateway
+    /// answered 400/422 to the effort request; None when it was not tested or
+    /// failed for an unrelated reason (timeout, quota, server error).
+    #[serde(skip)]
+    pub effort_ok: Option<bool>,
 }
 
 /// 1x1 transparent PNG.
@@ -315,7 +324,36 @@ pub fn caps_one(agent: &ureq::Agent, base: &str, key: &str, model: &str) -> Caps
     let t = Instant::now();
     let images = check_of(call(serde_json::json!({}), user(image)), t, key, |_| Ok(()));
 
-    Caps { endpoint: Some(endpoint), streaming: Some(streaming), tools: Some(tools), caching: Some(caching), images: Some(images) }
+    let (reasoning, effort_ok) = if claude {
+        (None, None)
+    } else {
+        let t = Instant::now();
+        let reply = call(serde_json::json!({ "reasoning": { "effort": "high" } }), user(serde_json::json!("Reply OK.")));
+        let verdict = effort_verdict(&reply);
+        (Some(check_of(reply, t, key, |_| Ok(()))), verdict)
+    };
+
+    Caps { endpoint: Some(endpoint), streaming: Some(streaming), tools: Some(tools), caching: Some(caching), images: Some(images), reasoning, effort_ok }
+}
+
+fn effort_verdict(reply: &Reply) -> Option<bool> {
+    match reply {
+        Reply::Http(200..=299, _) => Some(true),
+        Reply::Http(400 | 422, _) => Some(false),
+        _ => None,
+    }
+}
+
+/// One verdict for the provider: any rejection wins, then any success.
+pub fn effort_verdict_of(results: &[(String, Caps)]) -> Option<bool> {
+    let v: Vec<bool> = results.iter().filter_map(|(_, c)| c.effort_ok).collect();
+    if v.contains(&false) {
+        Some(false)
+    } else if v.contains(&true) {
+        Some(true)
+    } else {
+        None
+    }
 }
 
 /// Capability test for a handful of models, two at a time.
@@ -374,6 +412,18 @@ mod tests {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     const KEY: &str = "sk-test-SECRET1234567890abcd";
+
+    #[test]
+    fn effort_verdict_needs_a_clear_answer() {
+        assert_eq!(effort_verdict(&Reply::Http(200, String::new())), Some(true));
+        assert_eq!(effort_verdict(&Reply::Http(400, "Extra inputs are not permitted".into())), Some(false));
+        assert_eq!(effort_verdict(&Reply::Http(429, String::new())), None);
+        assert_eq!(effort_verdict(&Reply::Timeout), None);
+        let c = |v| Caps { effort_ok: v, ..Default::default() };
+        assert_eq!(effort_verdict_of(&[("a".into(), c(Some(true))), ("b".into(), c(None))]), Some(true));
+        assert_eq!(effort_verdict_of(&[("a".into(), c(Some(true))), ("b".into(), c(Some(false)))]), Some(false));
+        assert_eq!(effort_verdict_of(&[("a".into(), c(None))]), None);
+    }
 
     #[test]
     fn classify_covers_spec() {

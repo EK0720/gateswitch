@@ -4,8 +4,9 @@ import { Icon } from "../icons";
 import { locale, t, tr } from "../i18n";
 import { groupOf, statusText } from "./ModelTable";
 import { ImageGuidance } from "./ImageGuidance";
+import { QuotaWatchAction } from "./QuotaWatch";
 
-const EFFORTS = [["default", "Default"], ["low", "low"], ["medium", "medium"], ["high", "high"]] as const;
+const EFFORTS = [["default", "Default"], ["low", "low"], ["medium", "medium"], ["high", "high"], ["xhigh", "xhigh"]] as const;
 
 export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify: (t: string) => void; goProviders: () => void }) {
   const [providers, setProviders] = useState<Provider[] | null>(null);
@@ -14,6 +15,7 @@ export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify
   const [model, setModel] = useState("");
   const [catalog, setCatalog] = useState(true);
   const [images, setImages] = useState(true);
+  const [levels, setLevels] = useState(false);
   const [effort, setEffort] = useState("default");
   const [names, setNames] = useState<CodexNames | null>(null);
   const [nameDraft, setNameDraft] = useState({ key: "", env: "" });
@@ -40,6 +42,10 @@ export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify
 
   const provider = providers?.find((p) => p.id === providerId);
   const models = provider?.models ?? [];
+  // A quota check may have stored a fresh result for the card.
+  const reloadProviders = () => { api.listProviders().then(setProviders).catch(() => {}); };
+  // Effort levels follow what this gateway is known to accept (capability test or last choice).
+  useEffect(() => { setLevels(provider?.effort_levels === true); }, [providerId, provider?.effort_levels]);
   useEffect(() => {
     if (provider && models.length && !models.includes(model)) {
       setModel(models.find((m) => /gpt|codex/i.test(m)) ?? models[0]);
@@ -86,8 +92,10 @@ export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify
   async function setup() {
     setBusy(true); setError(""); setDone(false);
     try {
-      const r = await api.codexSetup({ provider_id: providerId, model, effort: effort === "default" ? null : effort, catalog, images });
-      setCurrent(await api.codexCurrent());
+      const r = await api.codexSetup({ provider_id: providerId, model, effort: effort === "default" ? null : effort, catalog, images, levels: catalog && levels });
+      const [cur, ps] = await Promise.all([api.codexCurrent(), api.listProviders()]);
+      setCurrent(cur);
+      setProviders(ps);
       setDone(true);
       notify(r.message);
     } catch (e) {
@@ -142,11 +150,14 @@ export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify
             <b>{t("{model} is out of quota", { model })}</b>
             <div className="muted">{t("Checked at")} {new Date(probe.checked_at).toLocaleString(locale())}{probe.message ? `: ${probe.message}` : ""}</div>
           </div>
-          {alt && (
-            <button className="btn small" style={{ marginLeft: "auto" }} onClick={() => setModel(alt)}>
-              {t("Switch to another model in the group")}
-            </button>
-          )}
+          <div className="qw-acts">
+            {provider && <QuotaWatchAction provider={provider} model={model} probe={probe} notify={notify} onChange={reloadProviders} />}
+            {alt && (
+              <button className="btn small" onClick={() => setModel(alt)}>
+                {t("Switch to another model in the group")}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -185,6 +196,19 @@ export function Codex({ scan, notify, goProviders }: { scan: Scan | null; notify
                 <button key={v} aria-pressed={effort === v} onClick={() => setEffort(v)}>{t(label)}</button>
               ))}
             </div>
+          </div>
+          <div className="field">
+            <label>
+              {t("Effort levels in /model")}
+              <small>
+                {provider?.effort_levels === true
+                  ? t("This gateway accepts reasoning.effort")
+                  : provider?.effort_levels === false
+                    ? t("Off: this gateway rejected reasoning.effort, or you turned it off")
+                    : t("Not tested. Run the capability test on the Providers page, or turn on if the gateway is 9router")}
+              </small>
+            </label>
+            <input type="checkbox" className="switch" checked={catalog && levels} disabled={!catalog} onChange={(e) => setLevels(e.target.checked)} aria-label={t("Effort levels in /model")} />
           </div>
           <div className="field">
             <label>{t("Image input")}<small>{t("Allow image attachments")}</small></label>

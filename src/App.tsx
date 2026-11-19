@@ -197,7 +197,7 @@ export default function App() {
           {route === "claude-code" && <ClaudeCode scan={scan} notify={(m) => { notify(m); refresh(); }} goProviders={() => setRoute("providers")} />}
           {route === "claude-desktop" && <ClaudeDesktop scan={scan} notify={(m) => { notify(m); refresh(); }} goProviders={() => setRoute("providers")} />}
           {route === "orca" && <Orca scan={scan} notify={(m) => { notify(m); refresh(); }} goCodex={() => setRoute("codex")} />}
-          {route === "usage" && <Usage />}
+          {route === "usage" && <Usage notify={notify} go={(r) => setRoute(r as Route)} />}
           {route === "apps" && <Apps scan={scan} />}
           {route === "settings" && <Settings dark={dark} onToggleTheme={toggleTheme} notify={(m) => { notify(m); refresh(); }} go={(r) => setRoute(r as Route)} onLang={switchLang} />}
         </section>

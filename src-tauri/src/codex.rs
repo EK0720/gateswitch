@@ -22,6 +22,9 @@ pub struct Request {
     pub catalog: bool,
     #[serde(default)]
     pub images: bool,
+    /// List effort levels in the catalog so Codex sends reasoning.effort.
+    #[serde(default)]
+    pub levels: bool,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -194,18 +197,30 @@ pub fn is_owned_catalog(path: &str, data: &Path) -> bool {
     name_ok && p.parent().map(|d| d == catalog_dir(data)).unwrap_or(false)
 }
 
+/// Effort levels advertised when the provider accepts reasoning.effort.
+pub const EFFORT_LEVELS: &[&str] = &["low", "medium", "high", "xhigh"];
+
 /// Build the gateway model catalog for Codex's /model picker. Content-addressed
 /// file name so old catalogs stay valid for undo.
-pub fn build_catalog(models: &[String], selected: &str, images: bool, data: &Path) -> Result<(PathBuf, Vec<u8>), String> {
+pub fn build_catalog(models: &[String], selected: &str, images: bool, levels: bool, data: &Path) -> Result<(PathBuf, Vec<u8>), String> {
     let mut ids: Vec<&str> = models.iter().map(String::as_str).chain([selected]).collect();
     ids.sort_by_key(|s| s.to_lowercase());
     ids.dedup();
     for id in &ids {
         validate_model(id)?;
     }
-    // No "supported_reasoning_levels": advertising effort levels makes Codex
-    // send reasoning.effort on every request, and gateways whose upstream is a
-    // plain chat API reject it with "Extra inputs are not permitted".
+    // "supported_reasoning_levels" must be present: Codex 0.157+ refuses a
+    // catalog without it ("missing field `supported_reasoning_levels`").
+    // Listing levels makes Codex show the effort picker and send
+    // reasoning.effort on every request. Gateways that route to a plain chat API
+    // reject that ("Extra inputs are not permitted"), so it stays empty unless
+    // the provider is known to accept it (capability test or the user's switch).
+    // 9router, for one, falls back to "low" effort when none is sent.
+    let reasoning = if levels {
+        json!(EFFORT_LEVELS.iter().map(|e| json!({ "effort": e, "description": e })).collect::<Vec<_>>())
+    } else {
+        json!([])
+    };
     let modalities = if images { json!(["text", "image"]) } else { json!(["text"]) };
     let entries: Vec<_> = ids
         .iter()
@@ -218,6 +233,7 @@ pub fn build_catalog(models: &[String], selected: &str, images: bool, data: &Pat
                 "shell_type": "unified_exec",
                 "base_instructions": "You are Codex, a coding assistant. Follow the user instructions and repository guidance. Use available tools to inspect, edit and verify work. Report results accurately.",
                 "supports_reasoning_summaries": false, "default_reasoning_summary": "none",
+                "supported_reasoning_levels": reasoning,
                 "support_verbosity": false, "experimental_supported_tools": [],
                 "input_modalities": modalities,
                 "truncation_policy": {"mode": "tokens", "limit": 10000}
@@ -288,7 +304,7 @@ mod tests {
     use super::*;
 
     fn req(model: &str) -> Request {
-        Request { provider_id: "9router".into(), model: model.into(), effort: None, catalog: false, images: false }
+        Request { provider_id: "9router".into(), model: model.into(), effort: None, catalog: false, images: false, levels: false }
     }
 
     fn nm() -> Names {
@@ -332,13 +348,34 @@ mod tests {
     #[test]
     fn catalog_is_content_addressed_and_includes_selected() {
         let data = Path::new("/data");
-        let (p1, b1) = build_catalog(&["b".into(), "a".into()], "z[1m]", true, data).unwrap();
-        let (p2, _) = build_catalog(&["a".into(), "b".into()], "z[1m]", true, data).unwrap();
+        let (p1, b1) = build_catalog(&["b".into(), "a".into()], "z[1m]", true, false, data).unwrap();
+        let (p2, _) = build_catalog(&["a".into(), "b".into()], "z[1m]", true, false, data).unwrap();
         assert_eq!(p1, p2);
         assert!(is_owned_catalog(&p1.display().to_string(), data));
         let v: serde_json::Value = serde_json::from_slice(&b1).unwrap();
         assert_eq!(v["models"].as_array().unwrap().len(), 3);
         assert_eq!(v["models"][0]["input_modalities"][1], "image");
+    }
+
+    #[test]
+    fn catalog_lists_levels_only_when_asked() {
+        let (p0, _) = build_catalog(&["a".into()], "a", false, false, Path::new("/data")).unwrap();
+        let (p1, b) = build_catalog(&["a".into()], "a", false, true, Path::new("/data")).unwrap();
+        assert_ne!(p0, p1, "different content, different file");
+        let v: serde_json::Value = serde_json::from_slice(&b).unwrap();
+        let levels: Vec<&str> = v["models"][0]["supported_reasoning_levels"].as_array().unwrap().iter().map(|l| l["effort"].as_str().unwrap()).collect();
+        assert_eq!(levels, EFFORT_LEVELS);
+        assert_eq!(v["models"][0]["supported_reasoning_levels"][0]["description"], "low");
+    }
+
+    #[test]
+    fn catalog_has_empty_reasoning_levels() {
+        // Required by Codex 0.157+; must stay empty so Codex sends no reasoning.effort.
+        let (_, b) = build_catalog(&["a".into(), "b".into()], "a", false, false, Path::new("/data")).unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&b).unwrap();
+        for m in v["models"].as_array().unwrap() {
+            assert_eq!(m["supported_reasoning_levels"], serde_json::json!([]), "{m}");
+        }
     }
 
     #[test]

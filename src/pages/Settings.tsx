@@ -3,6 +3,7 @@ import { api, Check, errText } from "../api";
 import { Icon } from "../icons";
 import { getLang, Lang, setLang, t, tr } from "../i18n";
 import { Info } from "./Info";
+import { Background } from "./Background";
 import { autoCheck, checkForUpdate, currentVersion, installUpdate, setAutoCheck, useUpdate } from "../updater";
 
 export function Settings({ dark, onToggleTheme, notify, go, onLang }: { dark: boolean; onToggleTheme: () => void; notify: (t: string) => void; go: (route: string) => void; onLang?: (l: Lang) => void }) {
@@ -83,6 +84,8 @@ export function Settings({ dark, onToggleTheme, notify, go, onLang }: { dark: bo
           </div>
         </div>
       </div>
+
+      <Background notify={notify} />
 
       <div className="section-title">{t("Updates")}</div>
       <div className="card">

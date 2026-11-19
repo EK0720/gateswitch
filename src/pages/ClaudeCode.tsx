@@ -4,6 +4,7 @@ import { Icon } from "../icons";
 import { locale, t, tr } from "../i18n";
 import { groupOf, statusText } from "./ModelTable";
 import { HeaderHelp } from "./HeaderHelp";
+import { QuotaWatchAction } from "./QuotaWatch";
 
 const EFFORTS = [["default", "Default"], ["low", "low"], ["medium", "medium"], ["high", "high"], ["max", "max"]] as const;
 const effortLabel = (v: string, label: string) => (v === "default" ? t(label) : label);
@@ -40,6 +41,8 @@ export function ClaudeCode({ scan, notify, goProviders }: { scan: Scan | null; n
 
   const provider = providers?.find((p) => p.id === providerId);
   const models = provider?.models ?? [];
+  // A quota check may have stored a fresh result for the card.
+  const reloadProviders = () => { api.listProviders().then(setProviders).catch(() => {}); };
   useEffect(() => {
     if (provider && models.length && !models.includes(model)) {
       setModel(models.find((m) => /claude.*opus/i.test(m)) ?? models.find((m) => /claude/i.test(m)) ?? models[0]);
@@ -108,7 +111,10 @@ export function ClaudeCode({ scan, notify, goProviders }: { scan: Scan | null; n
             <b>{t("{model} is out of quota", { model })}</b>
             <div className="muted">{t("Checked at {time}", { time: new Date(probe.checked_at).toLocaleString(locale()) })}{probe.message ? `: ${tr(probe.message)}` : ""}</div>
           </div>
-          {alt && <button className="btn small" style={{ marginLeft: "auto" }} onClick={() => setModel(alt)}>{t("Switch to another model in the group")}</button>}
+          <div className="qw-acts">
+            {provider && <QuotaWatchAction provider={provider} model={model} probe={probe} notify={notify} onChange={reloadProviders} />}
+            {alt && <button className="btn small" onClick={() => setModel(alt)}>{t("Switch to another model in the group")}</button>}
+          </div>
         </div>
       )}
 
